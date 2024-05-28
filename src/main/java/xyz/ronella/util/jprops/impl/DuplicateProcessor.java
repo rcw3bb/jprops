@@ -11,8 +11,6 @@ import java.util.Scanner;
 
 public class DuplicateProcessor implements Processor {
 
-    public static Long serialVersionUID = 1L;
-
     @Override
     public void process(final File props) {
         try(final var fileReader = new Scanner(props)) {
