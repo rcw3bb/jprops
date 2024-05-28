@@ -1,0 +1,64 @@
+package xyz.ronella.util.jprops;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.nio.file.Paths;
+
+public class MetaGeneratorTest {
+
+    @Test
+    public void validateKeyOrder() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var expected = new String[] {"field1 ", "field2 ", "field3 ", "field4 ", "field5 "};
+        final var actual = metaGen.getMetadata().keySet().toArray(new String[] {});
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void validateCount() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var expected = new Integer[] {2, 2, 2, 1, 1};
+        final var actual = metaGen.getMetadata().values().stream()
+                .map(PropsMeta::count).toList().toArray(new Integer[] {});
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void singleLineMismatch() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "single-line-mismatch.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertThrowsExactly(JPropsException.class, metaGen::getMetadata);
+    }
+
+    @Test
+    public void multiLineMismatch() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "multi-line-mismatch.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertThrowsExactly(ValueMismatchException.class, metaGen::getMetadata);
+    }
+
+    @Test
+    public void mixMismatch() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "mix-mismatch.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertThrowsExactly(ValueMismatchException.class, metaGen::getMetadata);
+    }
+
+    @Test
+    public void mixMismatch2() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "mix-mismatch2.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertThrowsExactly(ValueMismatchException.class, metaGen::getMetadata);
+    }
+
+    @Test
+    public void fileNotFound() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "nonexistent.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertThrowsExactly(JPropsException.class, metaGen::getMetadata);
+    }
+
+}

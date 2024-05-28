@@ -1,0 +1,33 @@
+<ruleset name="Custom Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Best Pactices
+    </description>
+
+    <exclude-pattern>.*/SimpleJson\.java</exclude-pattern>
+    <exclude-pattern>.*/SimpleHttpServer\.java</exclude-pattern>
+    <exclude-pattern>.*/SimpleHttpExchange\.java</exclude-pattern>
+    <exclude-pattern>.*/PersonServiceImpl\.java</exclude-pattern>
+    <exclude-pattern>.*/AbstractPersonResource\.java</exclude-pattern>
+    <exclude-pattern>.*/AppConfig\.java</exclude-pattern>
+
+    <rule ref="category/java/design.xml/CyclomaticComplexity" />
+    <rule ref="category/java/errorprone.xml" />
+    <rule ref="category/java/bestpractices.xml/AvoidPrintStackTrace" />
+    <rule ref="category/java/bestpractices.xml/LooseCoupling" />
+    <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
+    <rule ref="category/java/design.xml/ExcessiveMethodLength">
+        <properties>
+            <property name="minimum" value="30" />
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/LongVariable">
+        <properties>
+            <property name="minimum" value="17" />
+        </properties>
+    </rule>
+
+</ruleset>

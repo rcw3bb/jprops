@@ -1,0 +1,190 @@
+import xyz.ronella.trivial.handy.CommandLocator
+
+import java.nio.file.Paths
+import org.apache.tools.ant.filters.ReplaceTokens
+import java.text.SimpleDateFormat
+
+buildscript {
+    dependencies {
+        classpath 'xyz.ronella.casual:trivial-chunk:2.18.0'
+    }
+}
+
+plugins {
+    id 'application'
+    id "org.javamodularity.moduleplugin" version "1.8.15"
+    id 'org.beryx.jlink' version '3.0.1'
+    id 'jacoco'
+    id 'pmd'
+    id "com.github.johnrengelman.shadow" version "8.1.1"
+}
+
+group GROUP
+version VERSION
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+application {
+    mainModule = moduleName
+    mainClass = MAIN_CLASS
+}
+
+shadowJar {
+    archiveClassifier.set("exe")
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:2.0.13'
+    implementation 'ch.qos.logback:logback-classic:1.5.6'
+
+    implementation 'commons-cli:commons-cli:1.7.0'
+    implementation 'xyz.ronella.casual:trivial-chunk:2.18.0'
+    implementation 'xyz.ronella.logging:logger-plus:1.2.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+
+    testImplementation 'org.mockito:mockito-core:5.11.0'
+}
+
+ext {
+    packageName = "${project.name}-${version}"
+    FILTER_TOKEN = [
+            'project.name': project.name
+            ,'app.version' : version
+            ,'build.date' : new SimpleDateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(new Date())
+    ]
+}
+
+test {
+    dependsOn(pmdMain)
+    finalizedBy(jacocoTestReport)
+    useJUnitPlatform()
+}
+
+jlink {
+    options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
+    launcher{
+        moduleName = application.mainModule
+        mainClassName = application.mainClass
+        jvmArgs = ['-Dlogback.configurationFile={{BIN_DIR}}\\conf\\logback.xml']
+    }
+    imageName = packageName.toString()
+}
+
+processResources {
+    filter(ReplaceTokens, tokens : FILTER_TOKEN)
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title": project.name,
+                "Implementation-Version": project.version
+        )
+    }
+}
+
+pmd {
+    consoleOutput = true
+    toolVersion = "6.51.0"
+    rulesMinimumPriority = 5
+    ruleSetFiles = files('quality/pmd/java/custom.xml')
+    ruleSets = []
+}
+
+pmdTest.enabled = false
+
+task preparePackage(dependsOn: ['jlink']) {
+    group = "build"
+    doLast {
+        def projectName = packageName.toString()
+        def confDirectory = "conf"
+
+        def batchFile = "${project.name}.bat"
+        def batchPath = Paths.get(buildDir.absolutePath, projectName, batchFile).toFile()
+
+        def jlinkTargetDir = Paths.get(buildDir.absolutePath, projectName)
+        def jlinkBinDir = Paths.get(jlinkTargetDir.toString(), 'bin')
+        def jlinkConfDir = Paths.get(jlinkBinDir.toFile().absolutePath, "..", confDirectory)
+
+        def logbackFile = "logback.xml"
+        def logbackPath = Paths.get(jlinkConfDir.toFile().absolutePath, logbackFile).toFile()
+
+        def mainResources = sourceSets.main.resources.sourceDirectories.asPath
+
+        copy {
+            from(Paths.get(buildDir.absolutePath, projectName, "bin"))
+            into(Paths.get(buildDir.absolutePath, projectName))
+            include batchFile
+        }
+
+        copy {
+            from(mainResources)
+            into(jlinkConfDir)
+            filter(ReplaceTokens, tokens : FILTER_TOKEN)
+            exclude('app-info.properties')
+        }
+
+        if (batchPath.exists()) {
+            def pattern = "set DIR=\"%~dp0\""
+            def replaceWith = "set DIR=\"%~dp0\\bin\""
+            def content = batchPath.text
+            def updatedContent = content.replace(pattern, replaceWith)
+            if (content != updatedContent) {
+                batchPath.write(updatedContent)
+            }
+        }
+
+        if (logbackPath.exists()) {
+            def pattern = "logs/"
+            def replaceWith = "../${pattern}"
+            def content = logbackPath.text
+            def updatedContent = content.replace(pattern, replaceWith)
+            if (content != updatedContent) {
+                logbackPath.write(updatedContent)
+            }
+        }
+    }
+}
+
+tasks.findByPath('jlink').finalizedBy(preparePackage)
+
+task packWin(group: 'distribution', dependsOn: ['jlink']) {
+    group = "build"
+    doLast {
+        def jlinkOutputDir = Paths.get(buildDir.absolutePath, packageName)
+        def outputFile = Paths.get(buildDir.absolutePath, 'pack', "${packageName}-win64.zip")
+        ant.zip(destfile: outputFile) {
+            fileset(dir: jlinkOutputDir)
+        }
+    }
+}
+
+task buildExec(type: Exec, group: 'distribution', dependsOn: [shadowJar]) {
+    def binDir = Paths.get(buildDir.absolutePath, 'bin').toFile()
+
+    doFirst {
+        if (!binDir.exists()) {
+            binDir.mkdirs()
+        }
+    }
+
+    def nativeExec = CommandLocator.locateAsString("native-image")
+    def libsDir = Paths.get(buildDir.absolutePath, 'libs').toFile().absolutePath
+    def fatJar = Paths.get(libsDir, "${packageName}-exe.jar").toFile().absolutePath
+    def outputFile = Paths.get(binDir.absolutePath, "${project.name}").toFile().absolutePath
+    commandLine nativeExec.get(), '--no-fallback', '-jar', fatJar, '-o', outputFile
+}
