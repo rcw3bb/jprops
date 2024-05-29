@@ -13,13 +13,19 @@ import java.util.Scanner;
 
 public class MetaGenerator {
 
-    protected transient final File propsFile;
-    protected transient final Map<String, PropsMeta> propsMetadata;
     private final static String MULTILINE_DELIM=".*\\\\\\s*$";
     private final static String VALUE_PAIR="^(\\s*[a-zA-Z_].*?)=(.*)$";
-    public MetaGenerator(final File propsFile) {
+    protected transient final File propsFile;
+    protected transient final Map<String, PropsMeta> propsMetadata;
+    protected transient final OSType osType;
+    public MetaGenerator(final File propsFile, final OSType osType) {
         this.propsFile = propsFile;
         this.propsMetadata = new LinkedHashMap<>();
+        this.osType = osType;
+    }
+
+    public MetaGenerator(final File propsFile) {
+        this(propsFile, OSType.identify());
     }
 
     protected boolean isValueComplete(final String value) {
@@ -55,12 +61,12 @@ public class MetaGenerator {
 
     protected void updateMetadata(final String key, final String value, boolean isComplete) throws JPropsException {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
-                .orElse(new PropsMeta(0, value, value, isComplete, true));
+                .orElse(new PropsMeta(0, value, value, isComplete, true, osType));
 
         validateValue(key, isComplete, oldMetadata, value);
 
         final var newMetaData = new PropsMeta(oldMetadata.count() + 1, oldMetadata.currentValue(),
-                oldMetadata.completedValue(), isComplete, oldMetadata.isInitial());
+                oldMetadata.completedValue(), isComplete, oldMetadata.isInitial(), osType);
 
         propsMetadata.put(key, newMetaData);
     }
@@ -96,19 +102,17 @@ public class MetaGenerator {
 
             if (wasNotCompleted) {
                 if (wasNotInitial) {
-
                     final var newValue = new StringBuilderAppender(oldMetadata.currentValue(),
-                            ___sb -> ___sb.append(!___sb.isEmpty() ? OSType.Linux.getEOL().eol() : ""));
+                            ___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
                     newValue.append(value);
 
                     final var newMetadata = new PropsMeta(oldMetadata.count(), newValue.toString()
-                            , isComplete ? newValue.toString() : null, isComplete, false);
+                            , isComplete ? newValue.toString() : null, isComplete, false, osType);
                     validateValue(key, isComplete, oldMetadata, newValue.toString());
                     propsMetadata.put(key, newMetadata);
-
                 } else {
                     final var newMetadata = new PropsMeta(oldMetadata.count(),
-                            oldMetadata.currentValue(), oldMetadata.currentValue(), isComplete, false);
+                            oldMetadata.currentValue(), oldMetadata.currentValue(), isComplete, false, osType);
                     propsMetadata.put(key, newMetadata);
                 }
             }
