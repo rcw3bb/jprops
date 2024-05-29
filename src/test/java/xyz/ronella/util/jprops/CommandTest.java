@@ -14,7 +14,7 @@ public class CommandTest {
     @Test
     public void testInvalidCommand() {
         final var command = Command.of("Random");
-        assertEquals(Command.INVALID, command.get());
+        assertTrue(command.isEmpty());
     }
 
 

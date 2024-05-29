@@ -6,11 +6,13 @@ import java.util.Optional;
 
 public enum Command {
     DUPLICATE,
-    INVALID;
+    SORT, //TODO: To be implemented.
+    MERGE //TODO: To be implemented.
+    ;
 
     public static Optional<Command> of(final String name) {
         return Arrays.stream(Command.values()).filter(___command -> {
-            final var targetName = Optional.ofNullable(name).orElse("INVALID").trim()
+            final var targetName = Optional.ofNullable(name).orElse("___INVALID___").trim()
                     .toUpperCase(Locale.getDefault());
             return ___command.name().toUpperCase(Locale.getDefault()).equals(targetName);
         }).findFirst();
