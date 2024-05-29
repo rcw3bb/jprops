@@ -1,6 +1,5 @@
 package xyz.ronella.util.jprops;
 
-import xyz.ronella.trivial.decorator.Mutable;
 import xyz.ronella.trivial.decorator.StringBuilderAppender;
 import xyz.ronella.trivial.handy.OSType;
 import xyz.ronella.trivial.handy.RegExMatcher;
@@ -16,8 +15,8 @@ public class MetaGenerator {
 
     protected transient final File propsFile;
     protected transient final Map<String, PropsMeta> propsMetadata;
-
     private final static String MULTILINE_DELIM=".*\\\\\\s*$";
+    private final static String VALUE_PAIR="^(\\s*[a-zA-Z_].*?)=(.*)$";
     public MetaGenerator(final File propsFile) {
         this.propsFile = propsFile;
         this.propsMetadata = new LinkedHashMap<>();
@@ -27,29 +26,25 @@ public class MetaGenerator {
         return !value.matches(MULTILINE_DELIM);
     }
 
-    public Map<String, PropsMeta> getMetadata() {
+    public Map<String, PropsMeta> getMetadata() throws JPropsException {
         try(final var fileReader = new Scanner(propsFile)) {
-            final var lastKey = new Mutable<String>(null);
+            Optional<String> key = Optional.empty();
+
             while(fileReader.hasNextLine()) {
                 final var rawLine = fileReader.nextLine();
-                final var validationError = new Mutable<Throwable>(null);
-                RegExMatcher.find("^(\\s*[a-zA-Z_].*?)=(.*)$", rawLine, ___matcher -> {
-                    final var key = ___matcher.group(1);
-                    final var value = ___matcher.group(2);
-                    final var isComplete = isValueComplete(value);
-                    try {
-                        lastKey.set(updateMetadata(key, value, isComplete));
-                    }
-                    catch (ValueMismatchException vme) {
-                        validationError.set(vme);
-                    }
-                });
+                final var matcher = RegExMatcher.find(VALUE_PAIR, rawLine);
 
-                if (Optional.ofNullable(validationError.get()).isPresent()) {
-                    throw new JPropsException(validationError.get());
+                if (matcher.matches()) {
+                    key = Optional.of(matcher.group(1));
+                    final var value = matcher.group(2);
+                    final var isComplete = isValueComplete(value);
+
+                    updateMetadata(key.get(), value, isComplete);
                 }
 
-                assembleMultiLine(lastKey.get(), rawLine);
+                if (key.isPresent()) {
+                    assembleMultiLine(key.get(), rawLine);
+                }
             }
         } catch (FileNotFoundException e) {
             throw new JPropsException(e);
@@ -58,18 +53,21 @@ public class MetaGenerator {
         return propsMetadata;
     }
 
-    protected String updateMetadata(final String key, final String value, boolean isComplete) {
+    protected void updateMetadata(final String key, final String value, boolean isComplete) throws JPropsException {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
                 .orElse(new PropsMeta(0, value, value, isComplete, true));
+
         validateValue(key, isComplete, oldMetadata, value);
+
         final var newMetaData = new PropsMeta(oldMetadata.count() + 1, oldMetadata.currentValue(),
                 oldMetadata.completedValue(), isComplete, oldMetadata.isInitial());
 
         propsMetadata.put(key, newMetaData);
-        return key;
     }
 
-    protected void validateValue(final String key, boolean isComplete, final PropsMeta metadata, final String value) {
+    protected void validateValue(final String key, boolean isComplete, final PropsMeta metadata, final String value)
+            throws JPropsException {
+
         final var optCompletedValue = Optional.ofNullable(metadata.completedValue());
 
         if (isComplete && optCompletedValue.isPresent() && !optCompletedValue.get().equals(value)) {
@@ -89,27 +87,31 @@ public class MetaGenerator {
         }
     }
 
-    private void assembleMultiLine(final String key, final String value) {
-        Optional.ofNullable(key).ifPresent(___key -> {
-            final var oldMetadata = propsMetadata.get(___key);
+    protected void assembleMultiLine(final String key, final String value) throws JPropsException {
+        if (key != null) {
+            final var oldMetadata = propsMetadata.get(key);
             final var wasNotCompleted = !oldMetadata.isComplete();
             final var wasNotInitial = !oldMetadata.isInitial();
             final var isComplete = isValueComplete(value);
-            final var newValue = new StringBuilderAppender(oldMetadata.currentValue(),
-                    ___sb -> ___sb.append(!___sb.isEmpty() ? OSType.Linux.getEOL().eol() : ""));
-            newValue.append(value);
+
             if (wasNotCompleted) {
                 if (wasNotInitial) {
+
+                    final var newValue = new StringBuilderAppender(oldMetadata.currentValue(),
+                            ___sb -> ___sb.append(!___sb.isEmpty() ? OSType.Linux.getEOL().eol() : ""));
+                    newValue.append(value);
+
                     final var newMetadata = new PropsMeta(oldMetadata.count(), newValue.toString()
                             , isComplete ? newValue.toString() : null, isComplete, false);
-                    validateValue(___key, isComplete, oldMetadata, newValue.toString());
-                    propsMetadata.put(___key, newMetadata);
+                    validateValue(key, isComplete, oldMetadata, newValue.toString());
+                    propsMetadata.put(key, newMetadata);
+
                 } else {
                     final var newMetadata = new PropsMeta(oldMetadata.count(),
                             oldMetadata.currentValue(), oldMetadata.currentValue(), isComplete, false);
-                    propsMetadata.put(___key, newMetadata);
+                    propsMetadata.put(key, newMetadata);
                 }
             }
-        });
+        }
     }
 }

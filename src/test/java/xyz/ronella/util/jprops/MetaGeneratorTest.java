@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 public class MetaGeneratorTest {
 
     @Test
-    public void validateKeyOrder() {
+    public void validateKeyOrder() throws JPropsException {
         final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
         final var expected = new String[] {"field1 ", "field2 ", "field3 ", "field4 ", "field5 "};
@@ -17,7 +17,7 @@ public class MetaGeneratorTest {
     }
 
     @Test
-    public void validateCount() {
+    public void validateCount() throws JPropsException {
         final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
         final var expected = new Integer[] {2, 2, 2, 1, 1};
@@ -30,7 +30,7 @@ public class MetaGeneratorTest {
     public void singleLineMismatch() {
         final var propsFile = Paths.get(".", "src", "test", "resources", "single-line-mismatch.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
-        assertThrowsExactly(JPropsException.class, metaGen::getMetadata);
+        assertThrowsExactly(ValueMismatchException.class, metaGen::getMetadata);
     }
 
     @Test

@@ -2,7 +2,7 @@ package xyz.ronella.util.jprops;
 
 import java.io.Serial;
 
-public class JPropsException extends RuntimeException {
+public class JPropsException extends Exception {
 
     @Serial
     private static final long serialVersionUID = 7563631854981094263L;
