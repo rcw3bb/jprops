@@ -1,6 +1,11 @@
-package xyz.ronella.util.jprops;
+package xyz.ronella.util.jprops.meta;
 
 import org.junit.jupiter.api.Test;
+import xyz.ronella.util.jprops.JPropsException;
+import xyz.ronella.util.jprops.meta.MetaGenerator;
+import xyz.ronella.util.jprops.meta.PropsMeta;
+import xyz.ronella.util.jprops.meta.ValueMismatchException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Paths;

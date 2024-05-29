@@ -1,8 +1,9 @@
-package xyz.ronella.util.jprops;
+package xyz.ronella.util.jprops.meta;
 
 import xyz.ronella.trivial.decorator.StringBuilderAppender;
 import xyz.ronella.trivial.handy.OSType;
 import xyz.ronella.trivial.handy.RegExMatcher;
+import xyz.ronella.util.jprops.JPropsException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
