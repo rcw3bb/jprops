@@ -8,7 +8,6 @@ import xyz.ronella.util.jprops.meta.MetaGenerator;
 import xyz.ronella.util.jprops.meta.PropsMeta;
 import xyz.ronella.util.jprops.util.ArgsMgr;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -20,9 +19,9 @@ public class DuplicateProcessor extends AbstractProcessor {
     }
 
     @Override
-    public void process(final File props) {
+    public void process() {
         try(final var gLOG = LOG.groupLog("process")) {
-            final var metaGen = new MetaGenerator(props);
+            final var metaGen = new MetaGenerator(argsMgr.getProps());
 
             try {
                 final List<Map.Entry<String, PropsMeta>> metadata = metaGen.getMetadata().entrySet().stream()

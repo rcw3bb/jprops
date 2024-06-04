@@ -2,6 +2,7 @@ package xyz.ronella.util.jprops.util;
 
 import org.apache.commons.cli.*;
 import xyz.ronella.util.jprops.Command;
+import xyz.ronella.util.jprops.impl.MissingCommandException;
 
 import java.io.File;
 import java.util.Arrays;
@@ -85,7 +86,7 @@ public class ArgsMgr {
     }
 
     private static void addListOption(final Options options, final String description) {
-        final var option = new Option("l", "list", false
+        final var option = new Option("list", false
                 , description);
         option.setRequired(false);
         options.addOption(option);
@@ -134,7 +135,7 @@ public class ArgsMgr {
         return newArgs;
     }
 
-    public static ArgsMgr build(final String[] args) {
+    public static ArgsMgr build(final String[] args) throws MissingCommandException {
         final var argManager = new ArgsMgr();
         final var options = new Options();
 
@@ -163,16 +164,12 @@ public class ArgsMgr {
         return argManager;
     }
 
-    public static void helpFormatter(final Options options) {
-        // Create HelpFormatter object
-        HelpFormatter formatter = new HelpFormatter();
-
-        // Print help message with header
-        formatter.printHelp(80, "java myprogram", "Test", options, null);
-    }
-
-    protected static void initOptions(final ArgsMgr argManager, final Options options) {
+    protected static void initOptions(final ArgsMgr argManager, final Options options) throws MissingCommandException {
         final var command = argManager.getCommand();
+
+        if (command == null) {
+            throw new MissingCommandException();
+        }
 
         switch (command) {
             case DUPLICATE -> {

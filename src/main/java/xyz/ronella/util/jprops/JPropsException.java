@@ -7,6 +7,10 @@ public class JPropsException extends Exception {
     @Serial
     private static final long serialVersionUID = 7563631854981094263L;
 
+    public JPropsException() {
+        super();
+    }
+
     public JPropsException(final String message) {
         super(message);
     }

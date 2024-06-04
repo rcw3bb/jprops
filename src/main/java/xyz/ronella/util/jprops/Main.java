@@ -2,6 +2,7 @@ package xyz.ronella.util.jprops;
 
 import xyz.ronella.logging.LoggerPlus;
 import org.slf4j.LoggerFactory;
+import xyz.ronella.util.jprops.impl.MissingCommandException;
 import xyz.ronella.util.jprops.util.AppInfo;
 import xyz.ronella.util.jprops.util.ArgsMgr;
 
@@ -25,13 +26,11 @@ public class Main {
                 return;
             }
 
-            final var main = new Main();
-            mLOG.info(main.hello(argsMgr.getName()));
+            final var processor = ProcessorFactory.createProcessor(argsMgr);
+            processor.process();
+        } catch (MissingCommandException mce) {
+            LOGGER_PLUS.error("Missing command");
         }
-    }
-
-    public String hello(final String name) {
-        return String.format("Hello %s", name);
     }
 
 }
