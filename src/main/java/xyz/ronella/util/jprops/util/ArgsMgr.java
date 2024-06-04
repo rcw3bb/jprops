@@ -1,17 +1,22 @@
 package xyz.ronella.util.jprops.util;
 
 import org.apache.commons.cli.*;
+import xyz.ronella.util.jprops.Command;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 
 public class ArgsMgr {
 
     private String name;
 
-    private String command;
+    private Command command;
 
-    private String props;
+    private File props;
+
+    private transient boolean list;
 
     public boolean shouldExit() {
         return exit;
@@ -34,20 +39,28 @@ public class ArgsMgr {
         return this.name;
     }
 
-    public String getProps() {
+    public File getProps() {
         return props;
     }
 
-    public void setProps(String props) {
+    public void setProps(File props) {
         this.props = props;
     }
 
-    public String getCommand() {
+    public Command getCommand() {
         return command;
     }
 
-    public void setCommand(String command) {
+    public void setCommand(Command command) {
         this.command = command;
+    }
+
+    public Boolean shouldList() {
+        return list;
+    }
+
+    public void setList(Boolean list) {
+        this.list = list;
     }
 
     private static void addNameOption(final Options options) {
@@ -58,7 +71,7 @@ public class ArgsMgr {
     }
 
     private static void addPropOption(final Options options) {
-        final var option = new Option("p", "prop", true
+        final var option = new Option("p", "properties", true
                 , "The properties file.");
         option.setRequired(true);
         options.addOption(option);
@@ -71,6 +84,12 @@ public class ArgsMgr {
         options.addOption(option);
     }
 
+    private static void addListOption(final Options options, final String description) {
+        final var option = new Option("l", "list", false
+                , description);
+        option.setRequired(false);
+        options.addOption(option);
+    }
     private static void addGenericParamOption(final Options options) {
         final var genericParam = new Option("D", true, "Generic Parameter");
         genericParam.setRequired(false);
@@ -82,8 +101,17 @@ public class ArgsMgr {
 
     private static void helpInfo(final ArgsMgr argMgr, final Options options) {
         final var formatter = new HelpFormatter();
-        final var appName = AppInfo.INSTANCE.getAppName();
+        final var command = argMgr.getCommand();
+        final var appName = String.format("%s %s", AppInfo.INSTANCE.getAppName(), command.name().toLowerCase(Locale.ROOT));
         formatter.printHelp(appName, options);
+
+        if (command == Command.HELP) {
+            System.out.println("""
+                    Commands available:
+                    duplicate - The command for processing managing duplicate fields.
+                    """);
+        }
+
         argMgr.setShouldExit(true);
     }
 
@@ -101,7 +129,7 @@ public class ArgsMgr {
                 .map(___args -> ___args.toArray(new String[] {}))
                 .orElse(commandArg.isPresent() ? new String[] {} : args);
 
-        commandArg.ifPresent(argManager::setCommand);
+        commandArg.ifPresent(___command -> argManager.setCommand(Command.of(___command).get()));
 
         return newArgs;
     }
@@ -112,20 +140,20 @@ public class ArgsMgr {
 
         //addNameOption(options);
         //addGenericParamOption(options);
-        addHelpOption(options);
+        //addHelpOption(options);
 
         final var parser = new DefaultParser();
         CommandLine cmd = null;
 
         try {
             final var newArgs = prepareArgs(argManager, args);
+            initOptions(argManager, options);
 
             cmd = parser.parse(options, newArgs);
-
-            if (cmd.hasOption("help")) {
+            if (Command.HELP == argManager.getCommand()) {
                 helpInfo(argManager, options);
             } else {
-                argManager.setName(cmd.getOptionValue("name"));
+                initFields(argManager.getCommand(), argManager, cmd);
             }
         } catch (ParseException e) {
             System.out.println(e.getMessage());
@@ -133,6 +161,43 @@ public class ArgsMgr {
         }
 
         return argManager;
+    }
+
+    public static void helpFormatter(final Options options) {
+        // Create HelpFormatter object
+        HelpFormatter formatter = new HelpFormatter();
+
+        // Print help message with header
+        formatter.printHelp(80, "java myprogram", "Test", options, null);
+    }
+
+    protected static void initOptions(final ArgsMgr argManager, final Options options) {
+        final var command = argManager.getCommand();
+
+        switch (command) {
+            case DUPLICATE -> {
+                addHelpOption(options);
+                addPropOption(options);
+                addListOption(options, "List all the fields with duplicates.");
+            }
+        }
+    }
+
+    protected static void initFields(final Command command, final ArgsMgr argManager, final CommandLine cmd) {
+        switch (command) {
+            case HELP -> {}
+            case DUPLICATE -> {
+                Optional.ofNullable(cmd.getOptionValue("properties"))
+                        .ifPresent(___properties -> argManager.setProps(new File(___properties)));
+
+                if (cmd.hasOption("list")) {
+                    argManager.setList(true);
+                }
+            }
+            case SORT -> {}
+            case MERGE -> {}
+            default -> {}
+        }
     }
 
 }

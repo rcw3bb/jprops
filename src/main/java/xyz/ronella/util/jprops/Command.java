@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 public enum Command {
+    HELP,
     DUPLICATE,
     SORT, //TODO: To be implemented.
     MERGE //TODO: To be implemented.
