@@ -20,7 +20,32 @@ public class DuplicateProcessor extends AbstractProcessor {
 
     @Override
     public void process() {
-        try(final var gLOG = LOG.groupLog("process")) {
+        final var isDedupe = argsMgr.isDedupe();
+        if (isDedupe) {
+            dedupe();
+        }
+        else {
+            lightWeightList();
+        }
+    }
+
+    private void dedupe() {
+        try(final var gLOG = LOG.groupLog("dedupe")) {
+            final var props = argsMgr.getProps();
+            final var metaGen = new MetaGenerator(props);
+            try {
+
+                metaGen.getMetadata().forEach((key, value) ->
+                        System.out.printf("%s=%s%s", key, value.currentValue(), value.osType().getEOL().eol()));
+
+            } catch (JPropsException e) {
+                gLOG.error(LOG.getStackTraceAsString(e));
+            }
+        }
+    }
+
+    private void lightWeightList() {
+        try(final var gLOG = LOG.groupLog("lightWeightList")) {
             final var metaGen = new MetaGenerator(argsMgr.getProps());
 
             try {
