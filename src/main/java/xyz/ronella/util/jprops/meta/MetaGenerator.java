@@ -11,112 +11,82 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class MetaGenerator {
 
-    private final static String MULTILINE_DELIM=".*\\\\\\s*$";
-    private final static String VALUE_PAIR="^(\\s*[a-zA-Z_].*?)=(.*)$";
+    private final static String MULTILINE_DELIM="^.*\\\\\\s*$";
     protected transient final File propsFile;
     protected transient final Map<String, PropsMeta> propsMetadata;
     protected transient final OSType osType;
+    private transient final String valuePairPattern;
+
     public MetaGenerator(final File propsFile, final OSType osType) {
         this.propsFile = propsFile;
         this.propsMetadata = new LinkedHashMap<>();
         this.osType = osType;
+        this.valuePairPattern = "^(\\s*[a-zA-Z_].*?)=((.*(" + osType.getEOL().eol() + ")?)*?)$";
     }
 
     public MetaGenerator(final File propsFile) {
         this(propsFile, OSType.identify());
     }
 
-    protected boolean isValueComplete(final String value) {
-        return !value.matches(MULTILINE_DELIM);
-    }
-
     public Map<String, PropsMeta> getMetadata() throws JPropsException {
         try(final var fileReader = new Scanner(propsFile)) {
-            Optional<String> key = Optional.empty();
-
+            final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
             while(fileReader.hasNextLine()) {
-                final var rawLine = fileReader.nextLine();
-                final var matcher = RegExMatcher.find(VALUE_PAIR, rawLine);
+                final var currentLine = fileReader.nextLine();
+                rawLine.append(currentLine);
+                if (currentLine.matches(MULTILINE_DELIM)) {
+                    continue;
+                }
 
+                final var matcher = RegExMatcher.find(valuePairPattern, rawLine.toString(), Pattern.MULTILINE);
                 if (matcher.matches()) {
-                    key = Optional.of(matcher.group(1));
+                    final var key = matcher.group(1);
                     final var value = matcher.group(2);
-                    final var isComplete = isValueComplete(value);
-
-                    updateMetadata(key.get(), value, isComplete);
+                    updateMetadata(key, value);
                 }
-
-                if (key.isPresent()) {
-                    assembleMultiLine(key.get(), rawLine);
-                }
+                rawLine.clear();
             }
         } catch (FileNotFoundException e) {
             throw new JPropsException(e);
         }
-
         return propsMetadata;
     }
 
-    protected void updateMetadata(final String key, final String value, boolean isComplete) throws JPropsException {
+    protected void updateMetadata(final String key, final String value) throws JPropsException {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
-                .orElse(new PropsMeta(0, value, value, isComplete, true, osType));
+                .orElse(new PropsMeta(0, value, value, osType));
 
-        validateValue(key, isComplete, oldMetadata, value);
+        validateValue(key, oldMetadata, value);
 
         final var newMetaData = new PropsMeta(oldMetadata.count() + 1, oldMetadata.currentValue(),
-                oldMetadata.completedValue(), isComplete, oldMetadata.isInitial(), osType);
+                oldMetadata.prevValue(), osType);
 
         propsMetadata.put(key, newMetaData);
     }
 
-    protected void validateValue(final String key, boolean isComplete, final PropsMeta metadata, final String value)
+    protected void validateValue(final String key, final PropsMeta metadata, final String value)
             throws JPropsException {
 
-        final var optCompletedValue = Optional.ofNullable(metadata.completedValue());
+        final var optPrevValue = Optional.ofNullable(metadata.prevValue());
 
-        if (isComplete && optCompletedValue.isPresent() && !optCompletedValue.get().equals(value)) {
+        if (optPrevValue.isPresent() && !optPrevValue.get().equals(value)) {
             final var message = String.format(
                             """
                             -------------------------------------------------
-                            %s has different completedValue and currentValue
-                            ---[Previously Completed Value]------------------
+                            %s has different previous and current value
+                            ---[Previously Value]----------------------------
                             %s
                             ---[Current Value]-------------------------------
                             %s
                             -------------------------------------------------
                             """,
-                    key, metadata.completedValue(), value);
+                    key, metadata.prevValue(), value);
 
             throw new ValueMismatchException(message);
-        }
-    }
-
-    protected void assembleMultiLine(final String key, final String value) throws JPropsException {
-        if (key != null) {
-            final var oldMetadata = propsMetadata.get(key);
-            final var wasNotCompleted = !oldMetadata.isComplete();
-            final var wasNotInitial = !oldMetadata.isInitial();
-            final var isComplete = isValueComplete(value);
-
-            if (wasNotCompleted) {
-                if (wasNotInitial) {
-                    final var newValue = new StringBuilderAppender(oldMetadata.currentValue(),
-                            ___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
-                    newValue.append(value);
-
-                    final var newMetadata = new PropsMeta(oldMetadata.count(), newValue.toString()
-                            , isComplete ? newValue.toString() : null, isComplete, false, osType);
-                    validateValue(key, isComplete, oldMetadata, newValue.toString());
-                    propsMetadata.put(key, newMetadata);
-                } else {
-                    final var newMetadata = new PropsMeta(oldMetadata.count(),
-                            oldMetadata.currentValue(), oldMetadata.currentValue(), isComplete, false, osType);
-                    propsMetadata.put(key, newMetadata);
-                }
-            }
         }
     }
 }
