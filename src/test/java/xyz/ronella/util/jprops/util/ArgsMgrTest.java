@@ -26,10 +26,10 @@ public class ArgsMgrTest {
     }
 
     @Test
-    public void dupList() throws MissingCommandException {
+    public void dedupe() throws MissingCommandException {
         final var props = "non-existent.properties";
-        final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "--list").toArray(new String[] {}));
-        assertTrue(argsMgr.shouldList());
+        final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-dedupe").toArray(new String[] {}));
+        assertTrue(argsMgr.isDedupe());
     }
 
     @Test

@@ -17,7 +17,7 @@ public class ArgsMgr {
 
     private File props;
 
-    private transient boolean list;
+    private boolean dedupe;
 
     public boolean shouldExit() {
         return exit;
@@ -56,12 +56,12 @@ public class ArgsMgr {
         this.command = command;
     }
 
-    public Boolean shouldList() {
-        return list;
+    public boolean isDedupe() {
+        return dedupe;
     }
 
-    public void setList(Boolean list) {
-        this.list = list;
+    public void setDedupe(boolean dedupe) {
+        this.dedupe = dedupe;
     }
 
     private static void addNameOption(final Options options) {
@@ -91,6 +91,14 @@ public class ArgsMgr {
         option.setRequired(false);
         options.addOption(option);
     }
+
+    private static void addDedupeOption(final Options options) {
+        final var option = new Option("dedupe", false
+                , "Remove duplication of fields.");
+        option.setRequired(false);
+        options.addOption(option);
+    }
+
     private static void addGenericParamOption(final Options options) {
         final var genericParam = new Option("D", true, "Generic Parameter");
         genericParam.setRequired(false);
@@ -175,7 +183,7 @@ public class ArgsMgr {
             case DUPLICATE -> {
                 addHelpOption(options);
                 addPropOption(options);
-                addListOption(options, "List all the fields with duplicates.");
+                addDedupeOption(options);
             }
         }
     }
@@ -187,8 +195,8 @@ public class ArgsMgr {
                 Optional.ofNullable(cmd.getOptionValue("properties"))
                         .ifPresent(___properties -> argManager.setProps(new File(___properties)));
 
-                if (cmd.hasOption("list")) {
-                    argManager.setList(true);
+                if (cmd.hasOption("dedupe")) {
+                    argManager.setDedupe(true);
                 }
             }
             case SORT -> {}
