@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 
-public class ArgsMgr {
+final public class ArgsMgr {
 
     private String name;
 
