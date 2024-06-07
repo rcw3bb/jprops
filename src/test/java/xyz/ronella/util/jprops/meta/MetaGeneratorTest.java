@@ -5,6 +5,7 @@ import xyz.ronella.util.jprops.JPropsException;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.nio.file.Paths;
+import java.util.Map;
 
 public class MetaGeneratorTest {
 
@@ -13,18 +14,46 @@ public class MetaGeneratorTest {
         final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
         final var expected = new String[] {"field1 ", "field2 ", "field3 ", "field4 ", "field5 "};
-        final var actual = metaGen.getMetadata().keySet().toArray(new String[] {});
+        final var actual = metaGen.getMetadata().entrySet().stream()
+                .filter(___entrySet -> ___entrySet.getValue().lineType()==LineType.VALUE_PAIR)
+                .map(Map.Entry::getKey)
+                .toArray();
         assertArrayEquals(expected, actual);
     }
 
     @Test
-    public void validateCount() throws JPropsException {
+    public void validateFieldValueCount() throws JPropsException {
         final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
         final var expected = new Integer[] {2, 2, 2, 1, 1};
         final var actual = metaGen.getMetadata().values().stream()
+                .filter(___metadata -> ___metadata.lineType() == LineType.VALUE_PAIR)
                 .map(PropsMeta::count).toList().toArray(new Integer[] {});
         assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void validateCommentCount() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var expected = 2;
+        final var actual = metaGen.getMetadata().values().stream()
+                .filter(___metadata -> ___metadata.lineType() == LineType.COMMENT)
+                .count();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void validateTextCount() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var expected = 3;
+        final var actual = metaGen.getMetadata().values().stream()
+                .filter(___metadata -> ___metadata.lineType() == LineType.TEXT)
+                .count();
+
+        assertEquals(expected, actual);
     }
 
     @Test

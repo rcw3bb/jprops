@@ -2,6 +2,8 @@ package xyz.ronella.util.jprops.impl;
 
 import org.junit.jupiter.api.Test;
 import xyz.ronella.util.jprops.util.ArgsMgr;
+import xyz.ronella.util.jprops.util.MissingCommandException;
+
 import java.nio.file.Paths;
 
 public class DuplicateProcessorTest {

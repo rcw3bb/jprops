@@ -2,7 +2,7 @@ package xyz.ronella.util.jprops;
 
 import xyz.ronella.logging.LoggerPlus;
 import org.slf4j.LoggerFactory;
-import xyz.ronella.util.jprops.impl.MissingCommandException;
+import xyz.ronella.util.jprops.util.MissingCommandException;
 import xyz.ronella.util.jprops.util.AppInfo;
 import xyz.ronella.util.jprops.util.ArgsMgr;
 

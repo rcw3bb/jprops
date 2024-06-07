@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import xyz.ronella.util.jprops.Command;
-import xyz.ronella.util.jprops.impl.MissingCommandException;
 
 import java.io.File;
 import java.util.List;

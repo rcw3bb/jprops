@@ -2,7 +2,6 @@ package xyz.ronella.util.jprops.util;
 
 import org.apache.commons.cli.*;
 import xyz.ronella.util.jprops.Command;
-import xyz.ronella.util.jprops.impl.MissingCommandException;
 
 import java.io.File;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package xyz.ronella.util.jprops.impl;
+package xyz.ronella.util.jprops.util;
 
 import xyz.ronella.util.jprops.JPropsException;
 

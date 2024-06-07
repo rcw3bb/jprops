@@ -35,7 +35,9 @@ public class MetaGenerator {
     public Map<String, PropsMeta> getMetadata() throws JPropsException {
         try(final var fileReader = new Scanner(propsFile)) {
             final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
+            var lineNumber = 0;
             while(fileReader.hasNextLine()) {
+                ++lineNumber;
                 final var currentLine = fileReader.nextLine();
                 rawLine.append(currentLine);
                 if (currentLine.matches(MULTILINE_DELIM)) {
@@ -46,7 +48,10 @@ public class MetaGenerator {
                 if (matcher.matches()) {
                     final var key = matcher.group(1);
                     final var value = matcher.group(2);
-                    updateMetadata(key, value);
+                    updateMetadata(lineNumber, key, value);
+                }
+                else {
+                    updateMetadata(lineNumber, rawLine.toString());
                 }
                 rawLine.clear();
             }
@@ -56,16 +61,25 @@ public class MetaGenerator {
         return propsMetadata;
     }
 
-    protected void updateMetadata(final String key, final String value) throws JPropsException {
+    protected void updateMetadata(final int lineNumber, final String key, final String value) throws JPropsException {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
-                .orElse(new PropsMeta(0, value, value, osType));
+                .orElse(new PropsMeta(0, value, value, osType, lineNumber, LineType.VALUE_PAIR));
 
         validateValue(key, oldMetadata, value);
 
         final var newMetaData = new PropsMeta(oldMetadata.count() + 1, oldMetadata.currentValue(),
-                oldMetadata.prevValue(), osType);
+                oldMetadata.prevValue(), osType, oldMetadata.lineNumber(), oldMetadata.lineType());
 
         propsMetadata.put(key, newMetaData);
+    }
+
+
+    protected void updateMetadata(final int lineNumber, final String text) {
+        final var key = String.format("_LINE%d_", lineNumber);
+        final var lineType = text.matches("\\s*#.*") ? LineType.COMMENT : LineType.TEXT;
+        final var metadata = new PropsMeta(1, text, null, osType, lineNumber, lineType);
+
+        propsMetadata.put(key, metadata);
     }
 
     protected void validateValue(final String key, final PropsMeta metadata, final String value)

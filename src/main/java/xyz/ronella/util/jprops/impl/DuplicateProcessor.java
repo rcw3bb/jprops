@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 import xyz.ronella.logging.LoggerPlus;
 import xyz.ronella.util.jprops.AbstractProcessor;
 import xyz.ronella.util.jprops.JPropsException;
+import xyz.ronella.util.jprops.meta.LineType;
 import xyz.ronella.util.jprops.meta.MetaGenerator;
 import xyz.ronella.util.jprops.meta.PropsMeta;
 import xyz.ronella.util.jprops.util.ArgsMgr;
@@ -44,14 +45,8 @@ public class DuplicateProcessor extends AbstractProcessor {
                 gLOG.info("Temp file created: %s", tmpFile.getAbsolutePath());
 
                 try(final var writer = new PrintWriter(new FileWriter(tmpFile))) {
-                    metaGen.getMetadata().forEach((key, value) -> {
-                        final var isDuplicated = value.count() > 1;
-
-                        if (isDuplicated) {
-                            gLOG.info("[%s] just added once", key);
-                        }
-
-                        writer.printf("%s=%s%s", key, value.currentValue(), value.osType().getEOL().eol());
+                    metaGen.getMetadata().forEach((___key, ___value) -> {
+                        outputWriter(writer, ___key, ___value);
                     });
                 }
 
@@ -64,12 +59,27 @@ public class DuplicateProcessor extends AbstractProcessor {
         }
     }
 
+    private void outputWriter(final PrintWriter writer, final String key, final PropsMeta value) {
+        final var isDuplicated = value.count() > 1;
+        if (isDuplicated) {
+            LOG.info("[%s] just added once", key);
+        }
+
+        if (value.lineType() == LineType.VALUE_PAIR) {
+            writer.printf("%s=%s%s", key, value.currentValue(), value.osType().getEOL().eol());
+        }
+        else {
+            writer.printf("%s%s", value.currentValue(), value.osType().getEOL().eol());
+        }
+    }
+
     private void lightWeightList() {
         try(final var gLOG = LOG.groupLog("lightWeightList")) {
             final var metaGen = new MetaGenerator(argsMgr.getProps());
 
             try {
                 final List<Map.Entry<String, PropsMeta>> metadata = metaGen.getMetadata().entrySet().stream()
+                        .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
                         .filter(___entrySet -> ___entrySet.getValue().count() > 1)
                         .toList();
 
