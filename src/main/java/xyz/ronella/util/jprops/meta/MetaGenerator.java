@@ -20,12 +20,14 @@ public class MetaGenerator {
     protected transient final Map<String, PropsMeta> propsMetadata;
     protected transient final OSType osType;
     private transient final String valuePairPattern;
+    private transient boolean notLoaded;
 
     public MetaGenerator(final File propsFile, final OSType osType) {
         this.propsFile = propsFile;
         this.propsMetadata = new LinkedHashMap<>();
         this.osType = osType;
         this.valuePairPattern = "^(\\s*[a-zA-Z_].*?)=((.*(" + osType.getEOL().eol() + ")?)*?)$";
+        this.notLoaded = true;
     }
 
     public MetaGenerator(final File propsFile) {
@@ -33,30 +35,32 @@ public class MetaGenerator {
     }
 
     public Map<String, PropsMeta> getMetadata() throws JPropsException {
-        try(final var fileReader = new Scanner(propsFile)) {
-            final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
-            var lineNumber = 0;
-            while(fileReader.hasNextLine()) {
-                ++lineNumber;
-                final var currentLine = fileReader.nextLine();
-                rawLine.append(currentLine);
-                if (currentLine.matches(MULTILINE_DELIM)) {
-                    continue;
-                }
+        if (notLoaded) {
+            try (final var fileReader = new Scanner(propsFile)) {
+                final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
+                var lineNumber = 0;
+                while (fileReader.hasNextLine()) {
+                    ++lineNumber;
+                    final var currentLine = fileReader.nextLine();
+                    rawLine.append(currentLine);
+                    if (currentLine.matches(MULTILINE_DELIM)) {
+                        continue;
+                    }
 
-                final var matcher = RegExMatcher.find(valuePairPattern, rawLine.toString(), Pattern.MULTILINE);
-                if (matcher.matches()) {
-                    final var key = matcher.group(1);
-                    final var value = matcher.group(2);
-                    updateMetadata(lineNumber, key, value);
+                    final var matcher = RegExMatcher.find(valuePairPattern, rawLine.toString(), Pattern.MULTILINE);
+                    if (matcher.matches()) {
+                        final var key = matcher.group(1);
+                        final var value = matcher.group(2);
+                        updateMetadata(lineNumber, key, value);
+                    } else {
+                        updateMetadata(lineNumber, rawLine.toString());
+                    }
+                    rawLine.clear();
                 }
-                else {
-                    updateMetadata(lineNumber, rawLine.toString());
-                }
-                rawLine.clear();
+                notLoaded = false;
+            } catch (FileNotFoundException e) {
+                throw new JPropsException(e);
             }
-        } catch (FileNotFoundException e) {
-            throw new JPropsException(e);
         }
         return propsMetadata;
     }

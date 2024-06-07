@@ -39,19 +39,25 @@ public class DuplicateProcessor extends AbstractProcessor {
             final var props = argsMgr.getProps();
             final var metaGen = new MetaGenerator(props);
             try {
-                gLOG.info("Processing %s", props.getAbsolutePath());
+                final var shouldProcess = metaGen.getMetadata().values().stream()
+                        .anyMatch(___value -> ___value.count() > 1);
 
-                final var tmpFile = FileMgr.createTmpFile(props);
-                gLOG.info("Temp file created: %s", tmpFile.getAbsolutePath());
+                if (shouldProcess) {
+                    gLOG.info("Processing %s", props.getAbsolutePath());
 
-                try(final var writer = new PrintWriter(new FileWriter(tmpFile))) {
-                    metaGen.getMetadata().forEach((___key, ___value) -> {
-                        outputWriter(writer, ___key, ___value);
-                    });
+                    final var tmpFile = FileMgr.createTmpFile(props);
+                    gLOG.info("Temp file created: %s", tmpFile.getAbsolutePath());
+
+                    try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
+                        metaGen.getMetadata().forEach((___key, ___value) -> outputWriter(writer, ___key, ___value));
+                    }
+
+                    FileMgr.safeMove(tmpFile, props).ifPresent(___backupFile ->
+                            gLOG.info("Back file created: %s", ___backupFile));
                 }
-
-                FileMgr.safeMove(tmpFile, props).ifPresent(___backupFile ->
-                        gLOG.info("Back file created: %s", ___backupFile));
+                else {
+                    gLOG.info("No duplicate found.");
+                }
 
             } catch (JPropsException | IOException e) {
                 gLOG.error(LOG.getStackTraceAsString(e));
@@ -60,12 +66,13 @@ public class DuplicateProcessor extends AbstractProcessor {
     }
 
     private void outputWriter(final PrintWriter writer, final String key, final PropsMeta value) {
-        final var isDuplicated = value.count() > 1;
-        if (isDuplicated) {
-            LOG.info("[%s] just added once", key);
-        }
-
         if (value.lineType() == LineType.VALUE_PAIR) {
+
+            final var isDuplicated = value.count() > 1;
+            if (isDuplicated) {
+                LOG.info("[%s] normalized to one instance only", key);
+            }
+
             writer.printf("%s=%s%s", key, value.currentValue(), value.osType().getEOL().eol());
         }
         else {
@@ -90,7 +97,7 @@ public class DuplicateProcessor extends AbstractProcessor {
                 }
 
                 if (!hasError) {
-                    gLOG.info("No duplicates found.");
+                    gLOG.info("No duplicate found.");
                 }
             } catch (JPropsException e) {
                 gLOG.error(LOG.getStackTraceAsString(e));
