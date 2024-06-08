@@ -33,6 +33,9 @@ application {
 
 shadowJar {
     archiveClassifier.set("exe")
+    minimize {
+        exclude(dependency('ch.qos.logback:.*:.*'))
+    }
 }
 
 repositories {
