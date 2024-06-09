@@ -20,7 +20,19 @@ final public class ProcessorFactory {
      */
     public static Processor createProcessor(final ArgsMgr argsMgr) {
         return switch (argsMgr.getCommand()) {
-            case DUPLICATE ->  new DuplicateProcessor(argsMgr);
+            case DUPLICATE -> new DuplicateProcessor(argsMgr);
+            case SORT -> {
+                //TODO: To be implemented.
+                yield null;
+            }
+            case MERGE -> {
+                //TODO: To be implemented.
+                yield null;
+            }
+            case MLINE -> {
+                //TODO: To be implemented.
+                yield null;
+            }
             default -> throw new IllegalStateException("Unexpected command: " + argsMgr.getCommand());
         };
 
