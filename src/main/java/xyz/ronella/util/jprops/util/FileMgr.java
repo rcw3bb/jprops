@@ -9,9 +9,20 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
+/**
+ * The FileMgr class is the class that manages the file operations.
+ *
+ * @author Ron Webb
+ * @since 1.0.0
+ */
 final public class FileMgr {
     private FileMgr() {}
 
+    /**
+     * The getFilename method returns the filename without the extension.
+     * @param file The file.
+     * @return The filename without the extension.
+     */
     public static String getFilename(final File file) {
         Require.objects(file);
 
@@ -28,6 +39,11 @@ final public class FileMgr {
         return /*Has extension only*/ "NONAME";
     }
 
+    /**
+     * The getExtension method returns the extension of the file.
+     * @param file The file.
+     * @return The extension of the file.
+     */
     public static String getExtension(final File file) {
         Require.objects(file);
 
@@ -44,6 +60,12 @@ final public class FileMgr {
         return /*Has extension only*/ fileName.replace(".","");
     }
 
+    /**
+     * The createTmpFile method creates a temporary file.
+     * @param file The file.
+     * @return The temporary file.
+     * @throws IOException If an I/O error occurs.
+     */
     public static File createTmpFile(final File file) throws IOException {
         Require.objects(file);
 
@@ -53,6 +75,10 @@ final public class FileMgr {
         return File.createTempFile(fileName, suffix);
     }
 
+    /**
+     * The getBackupDir method returns the backup directory.
+     * @return The backup directory.
+     */
     private static File getBackupDir() {
         final var appData = System.getenv("LOCALAPPDATA");
         final var backupDir = new File(String.format("%s/%s/backup", appData, AppInfo.INSTANCE.getAppName()));
@@ -64,6 +90,12 @@ final public class FileMgr {
         return backupDir;
     }
 
+    /**
+     * The moveToBackup method moves the file to the backup directory.
+     * @param file The file.
+     * @return The backup file.
+     * @throws IOException If an I/O error occurs.
+     */
     protected static Optional<File> moveToBackup(final File file) throws IOException {
         Require.objects(file);
 
@@ -80,6 +112,13 @@ final public class FileMgr {
         return Optional.empty();
     }
 
+    /**
+     * The safeMove method moves the source file to the destination file.
+     * @param src The source file.
+     * @param dest The destination file.
+     * @return The backup file.
+     * @throws IOException If an I/O error occurs.
+     */
     public static Optional<File> safeMove(final File src, final File dest) throws IOException {
         Require.objects(
                 new RequireObject(src, "Source is required"),

@@ -6,10 +6,20 @@ import xyz.ronella.util.jprops.util.MissingCommandException;
 import xyz.ronella.util.jprops.util.AppInfo;
 import xyz.ronella.util.jprops.util.ArgsMgr;
 
-public class Main {
+/**
+ * The Main class is the entry point of the application.
+ *
+ * @author Ron Webb
+ * @since 1.0.0
+ */
+final public class Main {
 
     private final static LoggerPlus LOGGER_PLUS = new LoggerPlus(LoggerFactory.getLogger(Main.class));
 
+    /**
+     * The main method.
+     * @param args The command line arguments.
+     */
     public static void main(String[] args) {
         try (var mLOG = LOGGER_PLUS.groupLog("main")) {
             final var appInfo = AppInfo.INSTANCE;

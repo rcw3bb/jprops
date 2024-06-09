@@ -29,5 +29,9 @@
             <property name="minimum" value="17" />
         </properties>
     </rule>
-
+    <rule ref="category/java/documentation.xml/CommentRequired">
+        <properties>
+            <property name="fieldCommentRequirement" value="Ignored"/>
+        </properties>
+    </rule>
 </ruleset>

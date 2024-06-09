@@ -1,3 +1,9 @@
+/**
+ * This is module-info.java file for the module xyz.ronella.util.jprops
+ *
+ * @author Ron Webb
+ * @since 1.0.0
+ */
 module xyz.ronella.util.jprops {
 
     requires org.slf4j;

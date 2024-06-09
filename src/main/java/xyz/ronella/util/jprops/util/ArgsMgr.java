@@ -8,9 +8,13 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * The ArgsMgr class is the class that manages the command line arguments.
+ *
+ * @author Ron Webb
+ * @since 1.0.0
+ */
 final public class ArgsMgr {
-
-    private String name;
 
     private Command command;
 
@@ -18,56 +22,73 @@ final public class ArgsMgr {
 
     private boolean dedupe;
 
-    public boolean shouldExit() {
-        return exit;
-    }
-
-    public void setShouldExit(boolean exit) {
-        this.exit = exit;
-    }
-
     private transient boolean exit;
 
     private ArgsMgr() {
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    /**
+     * The shouldExit method returns true if the application should exit.
+     * @return True if the application should exit.
+     */
+    public boolean shouldExit() {
+        return exit;
     }
 
-    public String getName() {
-        return this.name;
+    /**
+     * The setShouldExit method sets the exit flag.
+     * @param exit The exit flag.
+     */
+    public void setShouldExit(boolean exit) {
+        this.exit = exit;
     }
 
+    /**
+     * The getProps method returns the properties file.
+     * @return The properties file.
+     */
     public File getProps() {
         return props;
     }
 
+    /**
+     * The setProps method sets the properties file.
+     * @param props The properties file.
+     */
     public void setProps(File props) {
         this.props = props;
     }
 
+    /**
+     * The getCommand method returns the command.
+     * @return The command.
+     */
     public Command getCommand() {
         return command;
     }
 
+    /**
+     * The setCommand method sets the command.
+     * @param command The command.
+     */
     public void setCommand(Command command) {
         this.command = command;
     }
 
+    /**
+     * The isDedupe method returns true if the dedupe flag is set.
+     * @return True if the dedupe flag is set.
+     */
     public boolean isDedupe() {
         return dedupe;
     }
 
+    /**
+     * The setDedupe method sets the dedupe flag.
+     * @param dedupe The dedupe flag.
+     */
     public void setDedupe(boolean dedupe) {
         this.dedupe = dedupe;
-    }
-
-    private static void addNameOption(final Options options) {
-        final var option = new Option("n", "name", true
-                , "Name of a person.");
-        option.setRequired(true);
-        options.addOption(option);
     }
 
     private static void addPropOption(final Options options) {
@@ -125,10 +146,12 @@ final public class ArgsMgr {
 
     private static String[] prepareArgs(final ArgsMgr argManager, final String[] args) {
 
+        final var commandPattern = "^\\s*[a-zA-Z_].*";
+
         final var commandArg = Optional.of(args)
                 .filter(___args -> Arrays.stream(___args).findAny().isPresent())
                 .map(___args -> /*Extract the first argument*/ ___args[0])
-                .filter(___arg -> ___arg.trim().matches("^\\s*[a-zA-Z_].*"));
+                .filter(___arg -> ___arg.trim().matches(commandPattern));
 
         final var newArgs = Optional.of(args)
                 .filter(___args -> ___args.length > 1)
@@ -142,13 +165,15 @@ final public class ArgsMgr {
         return newArgs;
     }
 
+    /**
+     * The build method creates an instance of the ArgsMgr.
+     * @param args The command line arguments.
+     * @return The ArgsMgr instance.
+     * @throws MissingCommandException When the command is missing.
+     */
     public static ArgsMgr build(final String[] args) throws MissingCommandException {
         final var argManager = new ArgsMgr();
         final var options = new Options();
-
-        //addNameOption(options);
-        //addGenericParamOption(options);
-        //addHelpOption(options);
 
         final var parser = new DefaultParser();
         CommandLine cmd = null;
@@ -171,7 +196,7 @@ final public class ArgsMgr {
         return argManager;
     }
 
-    protected static void initOptions(final ArgsMgr argManager, final Options options) throws MissingCommandException {
+    private static void initOptions(final ArgsMgr argManager, final Options options) throws MissingCommandException {
         final var command = argManager.getCommand();
 
         if (command == null) {
@@ -184,10 +209,19 @@ final public class ArgsMgr {
                 addPropOption(options);
                 addDedupeOption(options);
             }
+            case SORT -> {
+                //TODO: To be implemented.
+            }
+            case MERGE -> {
+                //TODO: To be implemented.
+            }
+            case MLINE -> {
+                //TODO: To be implemented.
+            }
         }
     }
 
-    protected static void initFields(final Command command, final ArgsMgr argManager, final CommandLine cmd) {
+    private static void initFields(final Command command, final ArgsMgr argManager, final CommandLine cmd) {
         switch (command) {
             case HELP -> {}
             case DUPLICATE -> {
@@ -198,9 +232,15 @@ final public class ArgsMgr {
                     argManager.setDedupe(true);
                 }
             }
-            case SORT -> {}
-            case MERGE -> {}
-            default -> {}
+            case SORT -> {
+                //TODO: To be implemented.
+            }
+            case MERGE -> {
+                //TODO: To be implemented.
+            }
+            case MLINE -> {
+                //TODO: To be implemented.
+            }
         }
     }
 

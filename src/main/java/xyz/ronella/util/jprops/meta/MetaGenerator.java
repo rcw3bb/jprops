@@ -13,15 +13,39 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+/**
+ * The MetaGenerator class is the class that generates the per line metadata of the properties file.
+ *
+ * @author Ron Webb
+ * @since 1.0.0
+ */
 public class MetaGenerator {
 
     private final static String MULTILINE_DELIM="^.*\\\\\\s*$";
+
+    /**
+     * The propsFile instance variable.
+     */
     protected transient final File propsFile;
+
+    /**
+     * The propsMetadata instance variable.
+     */
     protected transient final Map<String, PropsMeta> propsMetadata;
+
+    /**
+     * The osType instance variable.
+     */
     protected transient final OSType osType;
+
     private transient final String valuePairPattern;
     private transient boolean notLoaded;
 
+    /**
+     * The constructor.
+     * @param propsFile The properties file.
+     * @param osType The operating system type.
+     */
     public MetaGenerator(final File propsFile, final OSType osType) {
         this.propsFile = propsFile;
         this.propsMetadata = new LinkedHashMap<>();
@@ -30,10 +54,19 @@ public class MetaGenerator {
         this.notLoaded = true;
     }
 
+    /**
+     * The constructor.
+     * @param propsFile The properties file.
+     */
     public MetaGenerator(final File propsFile) {
         this(propsFile, OSType.identify());
     }
 
+    /**
+     * The getMetadata method returns the per line metadata of the properties file.
+     * @return The metadata of the properties file.
+     * @throws JPropsException When an error occurs.
+     */
     public Map<String, PropsMeta> getMetadata() throws JPropsException {
         if (notLoaded) {
             try (final var fileReader = new Scanner(propsFile)) {
@@ -65,6 +98,13 @@ public class MetaGenerator {
         return propsMetadata;
     }
 
+    /**
+     * The updateMetadata method updates the metadata.
+     * @param lineNumber The line number.
+     * @param key The key.
+     * @param value The value.
+     * @throws JPropsException When an error occurs.
+     */
     protected void updateMetadata(final int lineNumber, final String key, final String value) throws JPropsException {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
                 .orElse(new PropsMeta(0, value, value, osType, lineNumber, LineType.VALUE_PAIR));
@@ -77,7 +117,11 @@ public class MetaGenerator {
         propsMetadata.put(key, newMetaData);
     }
 
-
+    /**
+     * The updateMetadata method updates the metadata.
+     * @param lineNumber The line number.
+     * @param text The text.
+     */
     protected void updateMetadata(final int lineNumber, final String text) {
         final var key = String.format("_LINE%d_", lineNumber);
         final var lineType = text.matches("\\s*#.*") ? LineType.COMMENT : LineType.TEXT;
@@ -86,6 +130,13 @@ public class MetaGenerator {
         propsMetadata.put(key, metadata);
     }
 
+    /**
+     * The validateValue method validates the metadata.
+     * @param key The key.
+     * @param metadata The metadata.
+     * @param value The value.
+     * @throws JPropsException When an error occurs.
+     */
     protected void validateValue(final String key, final PropsMeta metadata, final String value)
             throws JPropsException {
 

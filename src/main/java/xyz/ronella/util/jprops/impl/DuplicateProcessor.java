@@ -16,13 +16,27 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The DuplicateProcessor class is the implementation of the Processor interface for the duplicate command.
+ * This class extends the AbstractProcessor class.
+ *
+ * @author Ron Webb
+ * @since 1.0.0
+ */
 public class DuplicateProcessor extends AbstractProcessor {
     private final static LoggerPlus LOG = new LoggerPlus(LoggerFactory.getLogger(DuplicateProcessor.class));
 
+    /**
+     * The constructor.
+     * @param argsMgr The ArgsMgr instance.
+     */
     public DuplicateProcessor(final ArgsMgr argsMgr) {
         super(argsMgr);
     }
 
+    /**
+     * The method that processes the command.
+     */
     @Override
     public void process() {
         final var isDedupe = argsMgr.isDedupe();
