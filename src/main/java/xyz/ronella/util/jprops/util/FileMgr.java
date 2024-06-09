@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * The FileMgr class is the class that manages the file operations.
@@ -30,14 +31,14 @@ final public class FileMgr {
         final var fileName = file.getName();
         final var dotIndex = fileName.lastIndexOf(".");
 
-        if (/*Has filename and extension*/ dotIndex > 0) {
-            return fileName.substring(0, dotIndex);
-        }
-        else if (/*Has filename only*/ dotIndex == -1) {
-            return fileName;
-        }
+        final Supplier<String> noDotLogic = () -> Optional.of(dotIndex)
+                .filter(___dotIndex -> /* Absence of dot in the filename */ ___dotIndex == -1)
+                .map(___dotIndex -> fileName)
+                .orElse("NONAME");
 
-        return /*Has extension only*/ "NONAME";
+        return Optional.of(dotIndex).filter(___dotIndex -> ___dotIndex > 0)
+                .map(___dotIndex -> fileName.substring(0, ___dotIndex))
+                .orElseGet(noDotLogic);
     }
 
     /**
@@ -51,14 +52,14 @@ final public class FileMgr {
         final var fileName = file.getName();
         final var dotIndex = fileName.lastIndexOf(".");
 
-        if (/*Has filename and extension*/ dotIndex > 0) {
-            return fileName.substring(dotIndex + 1);
-        }
-        else if (/*Has filename only*/ dotIndex == -1) {
-            return "NOEXT";
-        }
+        final Supplier<String> noDotLogic = () -> Optional.of(dotIndex)
+                .filter(___dotIndex -> ___dotIndex == -1)
+                .map(___dotIndex -> "NOEXT")
+                .orElse(fileName.replace(".", ""));
 
-        return /*Has extension only*/ fileName.replace(".","");
+        return Optional.of(dotIndex).filter(___dotIndex -> ___dotIndex > 0)
+                .map(___dotIndex -> fileName.substring(___dotIndex + 1))
+                .orElseGet(noDotLogic);
     }
 
     /**
