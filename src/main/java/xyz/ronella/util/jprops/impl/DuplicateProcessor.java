@@ -66,7 +66,7 @@ public class DuplicateProcessor extends AbstractProcessor {
                         metaGen.getMetadata().forEach((___key, ___value) -> outputWriter(writer, ___key, ___value));
                     }
 
-                    FileMgr.safeMove(tmpFile, props).ifPresent(___backupFile ->
+                    FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
                             gLOG.info("Back file created: %s", ___backupFile));
                 }
                 else {

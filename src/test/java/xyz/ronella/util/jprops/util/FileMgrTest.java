@@ -3,6 +3,7 @@ package xyz.ronella.util.jprops.util;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import xyz.ronella.util.jprops.Command;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +61,7 @@ public class FileMgrTest {
         final var file = new File("src\\test\\resources\\file-backup.txt");
         file.createNewFile();
 
-        final var backup = FileMgr.moveToBackup(file).get();
+        final var backup = FileMgr.moveToBackup(Command.DUPLICATE, file).get();
         assertTrue(backup.exists());
         System.out.println("Backup: " + backup.getAbsolutePath());
         backup.delete();
@@ -70,7 +71,7 @@ public class FileMgrTest {
     @Test
     public void moveToBackupNoFile() throws IOException {
         final var file = new File("src\\test\\resources\\dummy.txt");
-        final var backup = FileMgr.moveToBackup(file);
+        final var backup = FileMgr.moveToBackup(Command.DUPLICATE, file);
         assertTrue(backup.isEmpty());
     }
 
@@ -80,7 +81,7 @@ public class FileMgrTest {
         srcFile.createNewFile();
 
         final var destFile = new File("src\\test\\resources\\safe-dest.txt");
-        final var backupFile = FileMgr.safeMove(srcFile, destFile).get();
+        final var backupFile = FileMgr.safeMove(Command.DUPLICATE, srcFile, destFile).get();
 
         assertTrue(backupFile.exists());
         assertFalse(srcFile.exists());

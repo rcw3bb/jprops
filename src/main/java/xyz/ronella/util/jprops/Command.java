@@ -16,28 +16,42 @@ public enum Command {
     /**
      * The HELP command.
      */
-    HELP,
+    HELP("hlp"),
 
     /**
      * The DUPLICATE command.
      */
-    DUPLICATE,
+    DUPLICATE("dup"),
 
     /**
      * The SORT command.
      */
-    SORT, //TODO: To be implemented.
+    SORT("srt"), //TODO: To be implemented.
 
     /**
      * The MERGE command.
      */
-    MERGE, //TODO: To be implemented.
+    MERGE("mrg"), //TODO: To be implemented.
 
     /**
      * The MLINE (i.e. Multiline) command.
      */
-    MLINE //TODO: To be implemented.
+    MLINE("mli") //TODO: To be implemented.
     ;
+
+    private String code;
+
+    Command(final String code) {
+        this.code = code;
+    }
+
+    /**
+     * The getCode method returns the code of the command.
+     * @return The code of the command.
+     */
+    public String getCode() {
+        return code;
+    }
 
     /**
      * Converts a string command to its equivalent enum.

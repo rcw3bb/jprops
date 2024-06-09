@@ -2,6 +2,7 @@ package xyz.ronella.util.jprops.util;
 
 import xyz.ronella.trivial.handy.Require;
 import xyz.ronella.trivial.handy.RequireObject;
+import xyz.ronella.util.jprops.Command;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,11 +93,12 @@ final public class FileMgr {
 
     /**
      * The moveToBackup method moves the file to the backup directory.
+     * @param command The command.
      * @param file The file.
      * @return The backup file.
      * @throws IOException If an I/O error occurs.
      */
-    protected static Optional<File> moveToBackup(final File file) throws IOException {
+    protected static Optional<File> moveToBackup(final Command command, final File file) throws IOException {
         Require.objects(file);
 
         if (file.exists()) {
@@ -104,7 +106,8 @@ final public class FileMgr {
             final var filename = getFilename(file);
             final var extension = getExtension(file);
             final var timeElement = String.valueOf(System.currentTimeMillis());
-            final var backupFile = new File(backupDir, String.format("%s-%s.%s", filename, timeElement, extension));
+            final var backupFile = new File(backupDir, String.format("%s-%s-%s.%s", filename, command.getCode(),
+                    timeElement, extension));
             Files.move(file.toPath(), backupFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
             return Optional.of(backupFile);
         }
@@ -114,18 +117,19 @@ final public class FileMgr {
 
     /**
      * The safeMove method moves the source file to the destination file.
+     * @param command The command.
      * @param src The source file.
      * @param dest The destination file.
      * @return The backup file.
      * @throws IOException If an I/O error occurs.
      */
-    public static Optional<File> safeMove(final File src, final File dest) throws IOException {
+    public static Optional<File> safeMove(final Command command, final File src, final File dest) throws IOException {
         Require.objects(
                 new RequireObject(src, "Source is required"),
                 new RequireObject(dest, "Destination is required")
         );
 
-        final var backup = moveToBackup(dest);
+        final var backup = moveToBackup(command, dest);
 
         Files.move(src.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
 
