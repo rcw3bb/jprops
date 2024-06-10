@@ -39,11 +39,8 @@ public class DuplicateProcessor extends AbstractProcessor {
      * The method that processes the command.
      */
     @Override
-    public void process() {
-        LOG.info("Processing %s", argsMgr.getProps().getAbsolutePath());
-
-        final var isDedupe = argsMgr.isDedupe();
-        if (isDedupe) {
+    public void processLogic() {
+        if (argsMgr.isDedupe()) {
             dedupe();
         }
         else {
@@ -80,22 +77,18 @@ public class DuplicateProcessor extends AbstractProcessor {
         }
     }
 
-    private void outputWriter(final PrintWriter writer, final String key, final PropsMeta value) {
-
-        final var eol = value.osType().getEOL().eol();
-        final var currentValue = value.currentValue();
-
+    /**
+     * The method that writes the properties to the output.
+     * @param writer The PrintWriter instance.
+     * @param key The key.
+     * @param value The PropsMeta instance.
+     */
+    protected void outputWriter(final PrintWriter writer, final String key, final PropsMeta value) {
         Optional.of(value.count())
                 .filter(___count -> /* Has Duplicate */ ___count > 1)
                 .ifPresent(___isDuplicated -> LOG.info("[%s] normalized to one instance only", key));
 
-        Optional.of(value.lineType())
-                .filter(___lineType -> ___lineType == LineType.VALUE_PAIR)
-                .map(___isValuePair -> /* Value pair format */ "%s=%s%s")
-                .ifPresentOrElse(
-                        ___format -> writer.printf(___format, key, currentValue, eol),
-                        ()-> writer.printf(/* Generic format */ "%s%s", currentValue, eol)
-                );
+        super.outputWriter(writer, key, value);
     }
 
     private void lightWeightList() {
