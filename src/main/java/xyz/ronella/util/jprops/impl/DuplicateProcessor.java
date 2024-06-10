@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The DuplicateProcessor class is the implementation of the Processor interface for the duplicate command.
@@ -80,18 +81,21 @@ public class DuplicateProcessor extends AbstractProcessor {
     }
 
     private void outputWriter(final PrintWriter writer, final String key, final PropsMeta value) {
-        if (value.lineType() == LineType.VALUE_PAIR) {
 
-            final var isDuplicated = value.count() > 1;
-            if (isDuplicated) {
-                LOG.info("[%s] normalized to one instance only", key);
-            }
+        final var eol = value.osType().getEOL().eol();
+        final var currentValue = value.currentValue();
 
-            writer.printf("%s=%s%s", key, value.currentValue(), value.osType().getEOL().eol());
-        }
-        else {
-            writer.printf("%s%s", value.currentValue(), value.osType().getEOL().eol());
-        }
+        Optional.of(value.count())
+                .filter(___count -> /* Has Duplicate */ ___count > 1)
+                .ifPresent(___isDuplicated -> LOG.info("[%s] normalized to one instance only", key));
+
+        Optional.of(value.lineType())
+                .filter(___lineType -> ___lineType == LineType.VALUE_PAIR)
+                .map(___isValuePair -> /* Value pair format */ "%s=%s%s")
+                .ifPresentOrElse(
+                        ___format -> writer.printf(___format, key, currentValue, eol),
+                        ()-> writer.printf(/* Generic format */ "%s%s", currentValue, eol)
+                );
     }
 
     private void lightWeightList() {
