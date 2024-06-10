@@ -96,14 +96,13 @@ public class SortProcessor extends AbstractProcessor {
                 final var isSorted = unsortedKeys.equals(sortedKeys);
 
                 if (!isSorted) {
-                    gLOG.info("--- Sorted Properties [BEGIN] ---");
+                    gLOG.info("--- Sorted Fields [BEGIN] ---");
 
                     for (final var key : sortedKeys) {
-                        final var propsMeta = metaGen.getMetadata().get(key);
-                        gLOG.info("\t%s=%s", key, propsMeta.currentValue());
+                        gLOG.info("\t%s", key);
                     }
 
-                    gLOG.info("--- Sorted Properties [END] -----");
+                    gLOG.info("--- Sorted Fields [END] -----");
                 }
                 else {
                     gLOG.info("Properties file is already sorted.");
