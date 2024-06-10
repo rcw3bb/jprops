@@ -105,7 +105,7 @@ public class SortProcessor extends AbstractProcessor {
                     gLOG.info("--- Sorted Fields [END] -----");
                 }
                 else {
-                    gLOG.info("Properties file is already sorted.");
+                    gLOG.info("Nothing to do. Properties file is already sorted.");
                 }
 
             } catch (JPropsException e) {
