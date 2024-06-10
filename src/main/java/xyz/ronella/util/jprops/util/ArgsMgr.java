@@ -17,15 +17,11 @@ import java.util.Optional;
 final public class ArgsMgr {
 
     private Command command;
-
     private File props;
-
     private boolean dedupe;
-
+    private boolean apply;
     private transient boolean exit;
-
-    private ArgsMgr() {
-    }
+    private ArgsMgr() {}
 
     /**
      * The shouldExit method returns true if the application should exit.
@@ -91,6 +87,22 @@ final public class ArgsMgr {
         this.dedupe = dedupe;
     }
 
+    /**
+     * The isApply method returns true if the apply flag is set.
+     * @return True if the apply flag is set.
+     */
+    public boolean isApply() {
+        return apply;
+    }
+
+    /**
+     * The setApply method sets the apply flag.
+     * @param apply The apply flag.
+     */
+    public void setApply(boolean apply) {
+        this.apply = apply;
+    }
+
     private static void addPropOption(final Options options) {
         final var option = new Option("p", "properties", true
                 , "The properties file.");
@@ -115,6 +127,12 @@ final public class ArgsMgr {
     private static void addDedupeOption(final Options options) {
         final var option = new Option("dedupe", false
                 , "Remove duplication of fields.");
+        option.setRequired(false);
+        options.addOption(option);
+    }
+
+    private static void addApplyOption(final Options options, final String description) {
+        final var option = new Option("apply", false, description);
         option.setRequired(false);
         options.addOption(option);
     }
@@ -212,6 +230,7 @@ final public class ArgsMgr {
             case SORT -> {
                 addHelpOption(options);
                 addPropOption(options);
+                addApplyOption(options, "Apply the sorting to the properties file.");
             }
             case MERGE -> {
                 //TODO: To be implemented.
@@ -236,6 +255,10 @@ final public class ArgsMgr {
             case SORT -> {
                 Optional.ofNullable(cmd.getOptionValue("properties"))
                         .ifPresent(___properties -> argManager.setProps(new File(___properties)));
+
+                if (cmd.hasOption("apply")) {
+                    argManager.setApply(true);
+                }
             }
             case MERGE -> {
                 //TODO: To be implemented.

@@ -7,7 +7,11 @@ import xyz.ronella.util.jprops.JPropsException;
 import xyz.ronella.util.jprops.meta.LineType;
 import xyz.ronella.util.jprops.meta.MetaGenerator;
 import xyz.ronella.util.jprops.util.ArgsMgr;
+import xyz.ronella.util.jprops.util.FileMgr;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -35,9 +39,13 @@ public class SortProcessor extends AbstractProcessor {
      * The method that processes the command.
      */
     @Override
-    public void process() {
-        LOG.info("Processing %s", argsMgr.getProps().getAbsolutePath());
-        sortView();
+    public void processLogic() {
+        if (argsMgr.isApply()) {
+            applySort();
+        }
+        else {
+            sortView();
+        }
     }
 
     private List<String> getKeys(final MetaGenerator metaGen) throws JPropsException {
@@ -45,6 +53,37 @@ public class SortProcessor extends AbstractProcessor {
                 .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    private void applySort() {
+        try(final var gLOG = LOG.groupLog("applySort")) {
+            final var props = argsMgr.getProps();
+            final var metaGen = new MetaGenerator(props);
+            try {
+                final var unsortedKeys = getKeys(metaGen);
+                final var sortedKeys = unsortedKeys.stream().sorted().toList();
+                final var isSorted = unsortedKeys.equals(sortedKeys);
+
+                if (!isSorted) {
+                    final var tmpFile = FileMgr.createTmpFile(props);
+                    gLOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
+
+                    try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
+                        for (final var key : sortedKeys) {
+                            final var propsMeta = metaGen.getMetadata().get(key);
+                            outputWriter(writer, key, propsMeta);
+                        }
+                    }
+                    FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
+                            gLOG.info("Back file created: %s", ___backupFile));
+                }
+                else {
+                    gLOG.info("Properties file is already sorted.");
+                }
+            } catch (JPropsException | IOException e) {
+                gLOG.error(LOG.getStackTraceAsString(e));
+            }
+        }
     }
 
     private void sortView() {
