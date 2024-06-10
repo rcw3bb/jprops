@@ -88,8 +88,8 @@ public class MetaGenerator {
                     rawLine.clear();
                 }
                 notLoaded = false;
-            } catch (FileNotFoundException e) {
-                throw new JPropsException(e);
+            } catch (FileNotFoundException fnfe) {
+                throw new PropertiesNotFoundException(fnfe.getMessage());
             }
         }
         return propsMetadata;

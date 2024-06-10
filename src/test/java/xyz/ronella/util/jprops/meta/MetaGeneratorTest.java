@@ -88,7 +88,7 @@ public class MetaGeneratorTest {
     public void fileNotFound() {
         final var propsFile = Paths.get(".", "src", "test", "resources", "nonexistent.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
-        assertThrowsExactly(JPropsException.class, metaGen::getMetadata);
+        assertThrowsExactly(PropertiesNotFoundException.class, metaGen::getMetadata);
     }
 
 }
