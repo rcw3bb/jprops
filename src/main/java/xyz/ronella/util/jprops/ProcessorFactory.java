@@ -1,6 +1,7 @@
 package xyz.ronella.util.jprops;
 
 import xyz.ronella.util.jprops.impl.DuplicateProcessor;
+import xyz.ronella.util.jprops.impl.MergeProcessor;
 import xyz.ronella.util.jprops.impl.SortProcessor;
 import xyz.ronella.util.jprops.util.ArgsMgr;
 
@@ -23,10 +24,7 @@ final public class ProcessorFactory {
         return switch (argsMgr.getCommand()) {
             case DUPLICATE -> new DuplicateProcessor(argsMgr);
             case SORT -> new SortProcessor(argsMgr);
-            case MERGE -> {
-                //TODO: To be implemented.
-                yield null;
-            }
+            case MERGE -> new MergeProcessor(argsMgr);
             case MLINE -> {
                 //TODO: To be implemented.
                 yield null;

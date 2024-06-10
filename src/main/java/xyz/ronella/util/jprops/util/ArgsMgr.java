@@ -18,6 +18,8 @@ final public class ArgsMgr {
 
     private Command command;
     private File props;
+    private File srcProps;
+    private File dstProps;
     private boolean dedupe;
     private boolean apply;
     private transient boolean exit;
@@ -53,6 +55,38 @@ final public class ArgsMgr {
      */
     public void setProps(File props) {
         this.props = props;
+    }
+
+    /**
+     * The getSrcProps method returns the source properties file.
+     * @return The source properties file.
+     */
+    public File getSrcProps() {
+        return srcProps;
+    }
+
+    /**
+     * The setSrcProps method sets the source properties file.
+     * @param srcProps The source properties file.
+     */
+    public void setSrcProps(File srcProps) {
+        this.srcProps = srcProps;
+    }
+
+    /**
+     * The getDstProps method returns the destination properties file.
+     * @return The destination properties file.
+     */
+    public File getDstProps() {
+        return dstProps;
+    }
+
+    /**
+     * The setDstProps method sets the destination properties file.
+     * @param dstProps The destination properties file.
+     */
+    public void setDstProps(File dstProps) {
+        this.dstProps = dstProps;
     }
 
     /**
@@ -106,6 +140,20 @@ final public class ArgsMgr {
     private static void addPropOption(final Options options) {
         final var option = new Option("p", "properties", true
                 , "The properties file.");
+        option.setRequired(true);
+        options.addOption(option);
+    }
+
+    private static void addSrcPropOption(final Options options) {
+        final var option = new Option("sp", "source", true
+                , "The source properties file.");
+        option.setRequired(true);
+        options.addOption(option);
+    }
+
+    private static void addDstPropOption(final Options options) {
+        final var option = new Option("dp", "destination", true
+                , "The destination properties file.");
         option.setRequired(true);
         options.addOption(option);
     }
@@ -233,7 +281,9 @@ final public class ArgsMgr {
                 addApplyOption(options, "Apply the sorting to the properties file.");
             }
             case MERGE -> {
-                //TODO: To be implemented.
+                addHelpOption(options);
+                addSrcPropOption(options);
+                addDstPropOption(options);
             }
             case MLINE -> {
                 //TODO: To be implemented.
@@ -261,7 +311,10 @@ final public class ArgsMgr {
                 }
             }
             case MERGE -> {
-                //TODO: To be implemented.
+                Optional.ofNullable(cmd.getOptionValue("source"))
+                        .ifPresent(___properties -> argManager.setSrcProps(new File(___properties)));
+                Optional.ofNullable(cmd.getOptionValue("destination"))
+                        .ifPresent(___properties -> argManager.setDstProps(new File(___properties)));
             }
             case MLINE -> {
                 //TODO: To be implemented.

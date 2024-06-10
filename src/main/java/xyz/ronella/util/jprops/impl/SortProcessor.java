@@ -60,7 +60,7 @@ public class SortProcessor extends AbstractProcessor {
             final var props = argsMgr.getProps();
             final var metaGen = new MetaGenerator(props);
             try {
-                final var unsortedKeys = getKeys(metaGen);
+                final var unsortedKeys = metaGen.getKeysByLineType(LineType.VALUE_PAIR);
                 final var sortedKeys = unsortedKeys.stream().sorted().toList();
                 final var isSorted = unsortedKeys.equals(sortedKeys);
 

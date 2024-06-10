@@ -7,10 +7,7 @@ import xyz.ronella.util.jprops.JPropsException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -157,5 +154,18 @@ public class MetaGenerator {
 
             throw new ValueMismatchException(message);
         }
+    }
+
+    /**
+     * The getKeysByLineType method returns the keys by line type.
+     * @param lineType The line type.
+     * @return The keys.
+     * @throws JPropsException When an error occurs.
+     */
+    public List<String> getKeysByLineType(final LineType lineType) throws JPropsException {
+        return getMetadata().entrySet().stream()
+                .filter(___entrySet -> ___entrySet.getValue().lineType() == lineType)
+                .map(Map.Entry::getKey)
+                .toList();
     }
 }

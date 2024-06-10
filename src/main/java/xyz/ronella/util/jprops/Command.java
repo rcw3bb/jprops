@@ -31,7 +31,7 @@ public enum Command {
     /**
      * The MERGE command.
      */
-    MERGE("mrg"), //TODO: To be implemented.
+    MERGE("mrg"),
 
     /**
      * The MLINE (i.e. Multiline) command.
