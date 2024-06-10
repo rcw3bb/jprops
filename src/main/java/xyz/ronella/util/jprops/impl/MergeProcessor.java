@@ -63,7 +63,7 @@ public class MergeProcessor  extends AbstractProcessor {
                 var hasChanges = false;
                 gLOG.info("--- Merging Properties [BEGIN] ---");
                 for (final var key : srcKeys) {
-                    mergeViewLogic(key, srcMetaGen, dstMetaGen);
+                    hasChanges |= mergeViewLogic(key, srcMetaGen, dstMetaGen);
                 }
                 if (!hasChanges) {
                     gLOG.info("Nothing to merge.");
