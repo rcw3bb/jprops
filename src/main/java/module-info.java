@@ -4,7 +4,7 @@
  * @author Ron Webb
  * @since 1.0.0
  */
-module xyz.ronella.util.jprops {
+module xyz.ronella.tool.jprops {
 
     requires org.slf4j;
     requires ch.qos.logback.classic;
