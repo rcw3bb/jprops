@@ -26,7 +26,7 @@ public enum Command {
     /**
      * The SORT command.
      */
-    SORT("srt"), //TODO: To be implemented.
+    SORT("srt"),
 
     /**
      * The MERGE command.

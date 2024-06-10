@@ -40,6 +40,8 @@ public class DuplicateProcessor extends AbstractProcessor {
      */
     @Override
     public void process() {
+        LOG.info("Processing %s", argsMgr.getProps().getAbsolutePath());
+
         final var isDedupe = argsMgr.isDedupe();
         if (isDedupe) {
             dedupe();
@@ -58,10 +60,8 @@ public class DuplicateProcessor extends AbstractProcessor {
                         .anyMatch(___value -> ___value.count() > 1);
 
                 if (shouldProcess) {
-                    gLOG.info("Processing %s", props.getAbsolutePath());
-
                     final var tmpFile = FileMgr.createTmpFile(props);
-                    gLOG.info("Temp file created: %s", tmpFile.getAbsolutePath());
+                    gLOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
 
                     try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
                         metaGen.getMetadata().forEach((___key, ___value) -> outputWriter(writer, ___key, ___value));

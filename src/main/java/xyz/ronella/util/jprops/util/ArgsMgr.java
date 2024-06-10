@@ -210,7 +210,8 @@ final public class ArgsMgr {
                 addDedupeOption(options);
             }
             case SORT -> {
-                //TODO: To be implemented.
+                addHelpOption(options);
+                addPropOption(options);
             }
             case MERGE -> {
                 //TODO: To be implemented.
@@ -233,7 +234,8 @@ final public class ArgsMgr {
                 }
             }
             case SORT -> {
-                //TODO: To be implemented.
+                Optional.ofNullable(cmd.getOptionValue("properties"))
+                        .ifPresent(___properties -> argManager.setProps(new File(___properties)));
             }
             case MERGE -> {
                 //TODO: To be implemented.
