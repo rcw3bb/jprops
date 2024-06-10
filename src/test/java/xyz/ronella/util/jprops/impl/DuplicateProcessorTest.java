@@ -3,8 +3,8 @@ package xyz.ronella.util.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import xyz.ronella.util.jprops.util.ArgsMgr;
-import xyz.ronella.util.jprops.util.MissingCommandException;
+import xyz.ronella.util.jprops.support.ArgsMgr;
+import xyz.ronella.util.jprops.support.MissingCommandException;
 
 import java.nio.file.Paths;
 

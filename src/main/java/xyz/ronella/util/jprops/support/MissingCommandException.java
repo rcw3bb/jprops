@@ -1,4 +1,4 @@
-package xyz.ronella.util.jprops.util;
+package xyz.ronella.util.jprops.support;
 
 import xyz.ronella.util.jprops.JPropsException;
 import java.io.Serial;

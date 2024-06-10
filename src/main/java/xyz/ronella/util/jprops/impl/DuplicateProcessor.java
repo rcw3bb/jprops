@@ -7,8 +7,8 @@ import xyz.ronella.util.jprops.JPropsException;
 import xyz.ronella.util.jprops.meta.LineType;
 import xyz.ronella.util.jprops.meta.MetaGenerator;
 import xyz.ronella.util.jprops.meta.PropsMeta;
-import xyz.ronella.util.jprops.util.ArgsMgr;
-import xyz.ronella.util.jprops.util.FileMgr;
+import xyz.ronella.util.jprops.support.ArgsMgr;
+import xyz.ronella.util.jprops.support.FileMgr;
 
 import java.io.FileWriter;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package xyz.ronella.util.jprops.util;
+package xyz.ronella.util.jprops.support;
 
 import org.apache.commons.cli.*;
 import xyz.ronella.util.jprops.Command;

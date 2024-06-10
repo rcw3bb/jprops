@@ -3,7 +3,7 @@ package xyz.ronella.util.jprops;
 import xyz.ronella.util.jprops.impl.DuplicateProcessor;
 import xyz.ronella.util.jprops.impl.MergeProcessor;
 import xyz.ronella.util.jprops.impl.SortProcessor;
-import xyz.ronella.util.jprops.util.ArgsMgr;
+import xyz.ronella.util.jprops.support.ArgsMgr;
 
 /**
  * The ProcessorFactory class is a factory class for creating a Processor instance.

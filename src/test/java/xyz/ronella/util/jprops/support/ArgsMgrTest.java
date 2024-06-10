@@ -1,4 +1,4 @@
-package xyz.ronella.util.jprops.util;
+package xyz.ronella.util.jprops.support;
 
 import static org.junit.jupiter.api.Assertions.*;
 

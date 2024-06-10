@@ -2,9 +2,9 @@ package xyz.ronella.util.jprops;
 
 import xyz.ronella.logging.LoggerPlus;
 import org.slf4j.LoggerFactory;
-import xyz.ronella.util.jprops.util.MissingCommandException;
-import xyz.ronella.util.jprops.util.AppInfo;
-import xyz.ronella.util.jprops.util.ArgsMgr;
+import xyz.ronella.util.jprops.support.MissingCommandException;
+import xyz.ronella.util.jprops.support.AppInfo;
+import xyz.ronella.util.jprops.support.ArgsMgr;
 
 /**
  * The Main class is the entry point of the application.
