@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * The SortProcessor class is the implementation of the Processor interface for the sort command.
@@ -57,60 +58,74 @@ public class SortProcessor extends AbstractProcessor {
 
     private void applySort() {
         try(final var gLOG = LOG.groupLog("applySort")) {
-            final var props = argsMgr.getProps();
-            final var metaGen = new MetaGenerator(props);
             try {
-                final var unsortedKeys = metaGen.getKeysByLineType(LineType.VALUE_PAIR);
-                final var sortedKeys = unsortedKeys.stream().sorted().toList();
-                final var isSorted = unsortedKeys.equals(sortedKeys);
-
+                final var isSorted = sortView();
                 if (!isSorted) {
+                    gLOG.info("Applying sortView findings.");
+                    final var props = argsMgr.getProps();
                     final var tmpFile = FileMgr.createTmpFile(props);
                     gLOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
 
                     try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
-                        for (final var key : sortedKeys) {
-                            final var propsMeta = metaGen.getMetadata().get(key);
-                            outputWriter(writer, key, propsMeta);
-                        }
+                        sortProcess(gLOG, ___processRecord -> {
+                            try {
+                                applySortLogic(___processRecord.key(), ___processRecord.metaGen(), writer);
+                            } catch (JPropsException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
                     }
                     FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
                             gLOG.info("Back file created: %s", ___backupFile));
                 }
-                else {
-                    gLOG.info("Properties file is already sorted.");
-                }
-            } catch (JPropsException | IOException e) {
+            }
+            catch (IOException e) {
                 gLOG.error(LOG.getStackTraceAsString(e));
             }
         }
     }
 
-    private void sortView() {
-        try(final var gLOG = LOG.groupLog("sortView")) {
-            final var metaGen = new MetaGenerator(argsMgr.getProps());
+    private void applySortLogic(final String key, final MetaGenerator metaGen, final PrintWriter writer)
+            throws JPropsException {
+        try(final var gLOG = LOG.groupLog("applySort")) {
+            final var propsMeta = metaGen.getMetadata().get(key);
+            outputWriter(writer, key, propsMeta);
+            gLOG.info("\t%s", key);
+        }
+    }
 
-            try {
-                final var unsortedKeys = getKeys(metaGen);
-                final var sortedKeys = unsortedKeys.stream().sorted().toList();
-                final var isSorted = unsortedKeys.equals(sortedKeys);
+    private boolean sortProcess(final LoggerPlus.GroupLogger gLOG, final Consumer<SortProcessRecord> sortLogic) {
+        final var metaGen = new MetaGenerator(argsMgr.getProps());
 
-                if (!isSorted) {
-                    gLOG.info("--- Sorted Fields [BEGIN] ---");
+        try {
+            final var unsortedKeys = getKeys(metaGen);
+            final var sortedKeys = unsortedKeys.stream().sorted().toList();
+            final var isSorted = unsortedKeys.equals(sortedKeys);
 
-                    for (final var key : sortedKeys) {
-                        gLOG.info("\t%s", key);
-                    }
+            if (!isSorted) {
+                gLOG.info("--- Sorted Fields [BEGIN] ---");
 
-                    gLOG.info("--- Sorted Fields [END] -----");
+                for (final var key : sortedKeys) {
+                    sortLogic.accept(new SortProcessRecord(key, metaGen));
                 }
-                else {
-                    gLOG.info("Nothing to do. Properties file is already sorted.");
-                }
 
-            } catch (JPropsException e) {
-                gLOG.error(LOG.getStackTraceAsString(e));
+                gLOG.info("--- Sorted Fields [END] -----");
+            } else {
+                gLOG.info("Nothing to do. Properties file is already sorted.");
             }
+
+            return isSorted;
+        } catch (JPropsException e) {
+            gLOG.error(LOG.getStackTraceAsString(e));
+        }
+
+        return false;
+    }
+
+    private boolean sortView() {
+        try(final var gLOG = LOG.groupLog("sortView")) {
+            return sortProcess(LOG.groupLog("sortView"), ___processRecord ->
+                    gLOG.info("\t%s", ___processRecord.key()));
         }
     }
 }

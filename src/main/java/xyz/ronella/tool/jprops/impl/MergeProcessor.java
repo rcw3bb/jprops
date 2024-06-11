@@ -80,7 +80,7 @@ public class MergeProcessor  extends AbstractProcessor {
         var hasChanges = false;
         gLOG.info("--- Merging Properties [BEGIN] ---");
         for (final var key : allKeys) {
-            hasChanges |= mergeLogic.apply(new MergeProcessRecord(key, srcMetaGen, dstMetaGen, null));
+            hasChanges |= mergeLogic.apply(new MergeProcessRecord(key, srcMetaGen, dstMetaGen));
         }
         if (!hasChanges) {
             gLOG.info("Nothing to merge.");
@@ -121,10 +121,8 @@ public class MergeProcessor  extends AbstractProcessor {
                     try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
                         mergeProcess(gLOG, ___processRecord -> {
                             try {
-                                final var processRecord = new MergeProcessRecord(___processRecord.key(),
-                                        ___processRecord.srcMetaGen(), ___processRecord.dstMetaGen(), writer);
-                                return applyMergeLogic(processRecord.key(), processRecord.srcMetaGen(),
-                                        processRecord.dstMetaGen(), writer);
+                                return applyMergeLogic(___processRecord.key(), ___processRecord.srcMetaGen(),
+                                        ___processRecord.dstMetaGen(), writer);
                             } catch (JPropsException exception) {
                                 throw new RuntimeException(exception);
                             }
