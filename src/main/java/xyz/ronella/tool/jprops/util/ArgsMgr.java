@@ -165,13 +165,6 @@ final public class ArgsMgr {
         options.addOption(option);
     }
 
-    private static void addListOption(final Options options, final String description) {
-        final var option = new Option("list", false
-                , description);
-        option.setRequired(false);
-        options.addOption(option);
-    }
-
     private static void addDedupeOption(final Options options) {
         final var option = new Option("dedupe", false
                 , "Remove duplication of fields.");
@@ -185,15 +178,6 @@ final public class ArgsMgr {
         options.addOption(option);
     }
 
-    private static void addGenericParamOption(final Options options) {
-        final var genericParam = new Option("D", true, "Generic Parameter");
-        genericParam.setRequired(false);
-        genericParam.setArgName("parameter=currentValue");
-        genericParam.setArgs(2);
-        genericParam.setValueSeparator('=');
-        options.addOption(genericParam);
-    }
-
     private static void helpInfo(final ArgsMgr argMgr, final Options options) {
         final var formatter = new HelpFormatter();
         final var command = argMgr.getCommand();
@@ -203,7 +187,10 @@ final public class ArgsMgr {
         if (command == Command.HELP) {
             System.out.println("""
                     Commands available:
-                    duplicate - The command for processing managing duplicate fields.
+                    duplicate - The command for managing duplicate fields.
+                    help - The command for showing help information.
+                    merge - The command for merging properties file.
+                    sort - The command for sorting fields fields.
                     """);
         }
 
