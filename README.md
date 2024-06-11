@@ -1,20 +1,72 @@
-# Java Application Template
+# JProps
 
-A basic gradle project for java application development.
+A simple properties file manager.
+
+[TOC]
+
+## Syntax
+
+``` 
+jprops <command> [params]
+```
+
+Where:
+
+The `command` is the command to perform. Use the `help` without any parameters to see all the available commands.
+
+The `params` is one or more parameters to influence the behavior of the command.
 
 ## Usage
 
-1. **Clone** this repository on your local.
+### Managing Duplicates
 
-2. Remove the **.git folder** from where you've cloned the repository.
+#### Viewing duplicates
 
-3. Run the following command:
+```
+jprops duplicate -p <file>
+```
 
-   ```
-   gradlew test
-   ```
+#### Resolving duplicates
 
-   > If it completes successfully your setup is good.
+```
+jprops duplicate -p <file> -dedupe
+```
+
+### Merging Properties Files
+
+#### Viewing what will be merged
+
+```
+jprops merge -sp <source-file> -dp <destination-file>
+```
+
+#### Doing the actual merge
+
+```
+jprops merge -sp <source-file> -dp <destination-file> -apply
+```
+
+### Sorting Fields
+
+#### Viewing sorted fields
+
+```
+jprops sort -p <file>
+```
+
+#### Perform the sorting of fields
+
+```
+jprops sort -p <file> -apply
+```
+
+## Line Ending
+
+All the available commands can use the `os` parameter to influence the line ending to use. For example to sort a properties files and use a `linux` line ending, use the following syntax:
+
+```
+jprops sort -p <file> -apply -os linux
+```
 
 ## License
 
