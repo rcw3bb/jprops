@@ -2,6 +2,7 @@ package xyz.ronella.tool.jprops.util;
 
 import org.apache.commons.cli.*;
 import xyz.ronella.tool.jprops.Command;
+import xyz.ronella.trivial.handy.OSType;
 
 import java.io.File;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ final public class ArgsMgr {
     private boolean dedupe;
     private boolean apply;
     private transient boolean exit;
+    private OSType targetOS;
     private ArgsMgr() {}
 
     /**
@@ -137,6 +139,22 @@ final public class ArgsMgr {
         this.apply = apply;
     }
 
+    /**
+     * The getTargetOS method returns the target operating system.
+     * @return The target operating system.
+     */
+    public OSType getTargetOS() {
+        return targetOS;
+    }
+
+    /**
+     * The setTargetOS method sets the target operating system.
+     * @param targetOS The target operating system.
+     */
+    public void setTargetOS(OSType targetOS) {
+        this.targetOS = targetOS;
+    }
+
     private static void addPropOption(final Options options) {
         final var option = new Option("p", "properties", true
                 , "The properties file.");
@@ -174,6 +192,13 @@ final public class ArgsMgr {
 
     private static void addApplyOption(final Options options, final String description) {
         final var option = new Option("apply", false, description);
+        option.setRequired(false);
+        options.addOption(option);
+    }
+
+    private static void addTargetOSOption(final Options options) {
+        final var option = new Option("os", "target-os", true
+                , "The target OS (i.e. linux, windows or mac) to which the line ending will be based on. Default is the current OS.");
         option.setRequired(false);
         options.addOption(option);
     }
@@ -255,6 +280,7 @@ final public class ArgsMgr {
         if (command == null) {
             throw new MissingCommandException();
         }
+        addTargetOSOption(options);
 
         switch (command) {
             case DUPLICATE -> {
@@ -290,6 +316,12 @@ final public class ArgsMgr {
         }
     }
 
+    private static void initTargetOSField(final ArgsMgr argManager, final CommandLine cmd) {
+        Optional.ofNullable(cmd.getOptionValue("target-os")).flatMap(___os -> Arrays.stream(OSType.values())
+                        .filter(___osType -> ___osType.name().equalsIgnoreCase(___os)).findFirst())
+                .ifPresentOrElse(argManager::setTargetOS, ()-> argManager.setTargetOS(OSType.identify()));
+    }
+
     private static void initFields(final Command command, final ArgsMgr argManager, final CommandLine cmd) {
         switch (command) {
             case HELP -> {}
@@ -316,6 +348,7 @@ final public class ArgsMgr {
                 //TODO: To be implemented.
             }
         }
+        initTargetOSField(argManager, cmd);
     }
 
 }

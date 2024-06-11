@@ -78,7 +78,7 @@ public class DuplicateProcessor extends AbstractProcessor {
     }
 
     private void duplicateProcess(final LoggerPlus.GroupLogger gLOG, final Consumer<Map<String, PropsMeta>> duplicateLogic) {
-        final var metaGen = new MetaGenerator(argsMgr.getProps());
+        final var metaGen = new MetaGenerator(argsMgr.getProps(), argsMgr.getTargetOS());
 
         try {
             final var metaData = metaGen.getMetadata();

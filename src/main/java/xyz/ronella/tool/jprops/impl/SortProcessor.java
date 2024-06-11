@@ -93,7 +93,7 @@ public class SortProcessor extends AbstractProcessor {
     }
 
     private boolean sortProcess(final LoggerPlus.GroupLogger gLOG, final Consumer<SortProcessRecord> sortLogic) {
-        final var metaGen = new MetaGenerator(argsMgr.getProps());
+        final var metaGen = new MetaGenerator(argsMgr.getProps(), argsMgr.getTargetOS());
 
         try {
             final var unsortedKeys = metaGen.getKeysByLineType(LineType.VALUE_PAIR);

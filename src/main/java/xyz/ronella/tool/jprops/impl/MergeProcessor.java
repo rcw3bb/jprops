@@ -68,8 +68,9 @@ public class MergeProcessor  extends AbstractProcessor {
     private boolean mergeProcess(final LoggerPlus.GroupLogger gLOG,
                               final Function<MergeProcessRecord, Boolean> mergeLogic) throws JPropsException {
 
-        final var srcMetaGen = new MetaGenerator(argsMgr.getSrcProps());
-        final var dstMetaGen = new MetaGenerator(argsMgr.getDstProps());
+        final var targetOS = argsMgr.getTargetOS();
+        final var srcMetaGen = new MetaGenerator(argsMgr.getSrcProps(), targetOS);
+        final var dstMetaGen = new MetaGenerator(argsMgr.getDstProps(), targetOS);
 
         final var srcKeys = srcMetaGen.getKeysByLineType(LineType.VALUE_PAIR);
         final var dstKeys = dstMetaGen.getKeysByLineType(LineType.VALUE_PAIR);

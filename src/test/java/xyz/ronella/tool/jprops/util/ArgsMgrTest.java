@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import xyz.ronella.tool.jprops.Command;
+import xyz.ronella.trivial.handy.OSType;
 
 import java.io.File;
 import java.util.List;
@@ -36,4 +37,19 @@ public class ArgsMgrTest {
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-h").toArray(new String[] {}));
         assertEquals(Command.DUPLICATE, argsMgr.getCommand());
     }
+
+    @Test
+    public void linuxOS() throws MissingCommandException {
+        final var props = "non-existent.properties";
+        final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-os", "linux").toArray(new String[] {}));
+        assertEquals(OSType.Linux, argsMgr.getTargetOS());
+    }
+
+    @Test
+    public void invalidOS() throws MissingCommandException {
+        final var props = "non-existent.properties";
+        final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-os", "invalid").toArray(new String[] {}));
+        assertNotNull(argsMgr.getTargetOS());
+    }
+
 }
