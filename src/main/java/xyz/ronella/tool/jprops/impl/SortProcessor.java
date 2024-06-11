@@ -12,8 +12,6 @@ import xyz.ronella.tool.jprops.util.FileMgr;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -49,12 +47,12 @@ public class SortProcessor extends AbstractProcessor {
         }
     }
 
-    private List<String> getKeys(final MetaGenerator metaGen) throws JPropsException {
+/*    private List<String> getKeys(final MetaGenerator metaGen) throws JPropsException {
         return metaGen.getMetadata().entrySet().stream()
                 .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
                 .map(Map.Entry::getKey)
                 .toList();
-    }
+    }*/
 
     private void applySort() {
         try(final var gLOG = LOG.groupLog("applySort")) {
@@ -98,7 +96,7 @@ public class SortProcessor extends AbstractProcessor {
         final var metaGen = new MetaGenerator(argsMgr.getProps());
 
         try {
-            final var unsortedKeys = getKeys(metaGen);
+            final var unsortedKeys = metaGen.getKeysByLineType(LineType.VALUE_PAIR);
             final var sortedKeys = unsortedKeys.stream().sorted().toList();
             final var isSorted = unsortedKeys.equals(sortedKeys);
 
