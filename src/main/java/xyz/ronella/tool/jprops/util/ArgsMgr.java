@@ -284,6 +284,7 @@ final public class ArgsMgr {
                 addHelpOption(options);
                 addSrcPropOption(options);
                 addDstPropOption(options);
+                addApplyOption(options, "Apply the merging to the properties file.");
             }
             case MLINE -> {
                 //TODO: To be implemented.
@@ -291,30 +292,38 @@ final public class ArgsMgr {
         }
     }
 
+    private static void initPropsField(final ArgsMgr argManager, final CommandLine cmd) {
+        Optional.ofNullable(cmd.getOptionValue("properties"))
+                .ifPresent(___properties -> argManager.setProps(new File(___properties)));
+    }
+
+    private static void initApplyField(final ArgsMgr argManager, final CommandLine cmd) {
+        if (cmd.hasOption("apply")) {
+            argManager.setApply(true);
+        }
+    }
+
     private static void initFields(final Command command, final ArgsMgr argManager, final CommandLine cmd) {
         switch (command) {
             case HELP -> {}
             case DUPLICATE -> {
-                Optional.ofNullable(cmd.getOptionValue("properties"))
-                        .ifPresent(___properties -> argManager.setProps(new File(___properties)));
+                initPropsField(argManager, cmd);
 
                 if (cmd.hasOption("dedupe")) {
                     argManager.setDedupe(true);
                 }
             }
             case SORT -> {
-                Optional.ofNullable(cmd.getOptionValue("properties"))
-                        .ifPresent(___properties -> argManager.setProps(new File(___properties)));
-
-                if (cmd.hasOption("apply")) {
-                    argManager.setApply(true);
-                }
+                initPropsField(argManager, cmd);
+                initApplyField(argManager, cmd);
             }
             case MERGE -> {
                 Optional.ofNullable(cmd.getOptionValue("source"))
                         .ifPresent(___properties -> argManager.setSrcProps(new File(___properties)));
                 Optional.ofNullable(cmd.getOptionValue("destination"))
                         .ifPresent(___properties -> argManager.setDstProps(new File(___properties)));
+
+                initApplyField(argManager, cmd);
             }
             case MLINE -> {
                 //TODO: To be implemented.
