@@ -280,24 +280,26 @@ final public class ArgsMgr {
         if (command == null) {
             throw new MissingCommandException();
         }
-        addTargetOSOption(options);
 
         switch (command) {
             case DUPLICATE -> {
                 addHelpOption(options);
                 addPropOption(options);
                 addDedupeOption(options);
+                addTargetOSOption(options);
             }
             case SORT -> {
                 addHelpOption(options);
                 addPropOption(options);
                 addApplyOption(options, "Apply the sorting to the properties file.");
+                addTargetOSOption(options);
             }
             case MERGE -> {
                 addHelpOption(options);
                 addSrcPropOption(options);
                 addDstPropOption(options);
                 addApplyOption(options, "Apply the merging to the properties file.");
+                addTargetOSOption(options);
             }
             case MLINE -> {
                 //TODO: To be implemented.
@@ -327,6 +329,7 @@ final public class ArgsMgr {
             case HELP -> {}
             case DUPLICATE -> {
                 initPropsField(argManager, cmd);
+                initTargetOSField(argManager, cmd);
 
                 if (cmd.hasOption("dedupe")) {
                     argManager.setDedupe(true);
@@ -335,6 +338,7 @@ final public class ArgsMgr {
             case SORT -> {
                 initPropsField(argManager, cmd);
                 initApplyField(argManager, cmd);
+                initTargetOSField(argManager, cmd);
             }
             case MERGE -> {
                 Optional.ofNullable(cmd.getOptionValue("source"))
@@ -343,12 +347,12 @@ final public class ArgsMgr {
                         .ifPresent(___properties -> argManager.setDstProps(new File(___properties)));
 
                 initApplyField(argManager, cmd);
+                initTargetOSField(argManager, cmd);
             }
             case MLINE -> {
                 //TODO: To be implemented.
             }
         }
-        initTargetOSField(argManager, cmd);
     }
 
 }
