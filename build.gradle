@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 
 buildscript {
     dependencies {
-        classpath 'xyz.ronella.casual:trivial-chunk:2.18.0'
+        classpath 'xyz.ronella.casual:trivial-chunk:2.19.0'
     }
 }
 
@@ -47,7 +47,7 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.5.6'
 
     implementation 'commons-cli:commons-cli:1.7.0'
-    implementation 'xyz.ronella.casual:trivial-chunk:2.18.0'
+    implementation 'xyz.ronella.casual:trivial-chunk:2.19.0'
     implementation 'xyz.ronella.logging:logger-plus:1.2.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
