@@ -1,6 +1,7 @@
 package xyz.ronella.tool.jprops.util;
 
 import xyz.ronella.tool.jprops.Command;
+import xyz.ronella.trivial.decorator.FileNomen;
 import xyz.ronella.trivial.handy.Require;
 import xyz.ronella.trivial.handy.RequireObject;
 
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * The FileMgr class is the class that manages the file operations.
@@ -21,48 +21,6 @@ final public class FileMgr {
     private FileMgr() {}
 
     /**
-     * The getFilename method returns the filename without the extension.
-     * @param file The file.
-     * @return The filename without the extension.
-     */
-    public static String getFilename(final File file) {
-        Require.objects(file);
-
-        final var fileName = file.getName();
-        final var dotIndex = fileName.lastIndexOf(".");
-
-        final Supplier<String> noDotLogic = () -> Optional.of(dotIndex)
-                .filter(___dotIndex -> /* Absence of dot in the filename */ ___dotIndex == -1)
-                .map(___dotIndex -> fileName)
-                .orElse("NONAME");
-
-        return Optional.of(dotIndex).filter(___dotIndex -> ___dotIndex > 0)
-                .map(___dotIndex -> fileName.substring(0, ___dotIndex))
-                .orElseGet(noDotLogic);
-    }
-
-    /**
-     * The getExtension method returns the extension of the file.
-     * @param file The file.
-     * @return The extension of the file.
-     */
-    public static String getExtension(final File file) {
-        Require.objects(file);
-
-        final var fileName = file.getName();
-        final var dotIndex = fileName.lastIndexOf(".");
-
-        final Supplier<String> noDotLogic = () -> Optional.of(dotIndex)
-                .filter(___dotIndex -> ___dotIndex == -1)
-                .map(___dotIndex -> "NOEXT")
-                .orElse(fileName.replace(".", ""));
-
-        return Optional.of(dotIndex).filter(___dotIndex -> ___dotIndex > 0)
-                .map(___dotIndex -> fileName.substring(___dotIndex + 1))
-                .orElseGet(noDotLogic);
-    }
-
-    /**
      * The createTmpFile method creates a temporary file.
      * @param file The file.
      * @return The temporary file.
@@ -71,7 +29,7 @@ final public class FileMgr {
     public static File createTmpFile(final File file) throws IOException {
         Require.objects(file);
 
-        final var fileName = getFilename(file);
+        final var fileName = new FileNomen(file).getFilename().orElse("NONAME");
         final var suffix = ".properties";
 
         return File.createTempFile(fileName, suffix);
@@ -104,8 +62,9 @@ final public class FileMgr {
 
         if (file.exists()) {
             final var backupDir = getBackupDir();
-            final var filename = getFilename(file);
-            final var extension = getExtension(file);
+            final var fileNomen = new FileNomen(file);
+            final var filename = fileNomen.getFilename().orElse("NONAME");
+            final var extension = fileNomen.getExtension().orElse("properties");
             final var timeElement = String.valueOf(System.currentTimeMillis());
             final var backupFile = new File(backupDir, String.format("%s-%s-%s.%s", filename, command.getCode(),
                     timeElement, extension));

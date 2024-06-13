@@ -21,42 +21,6 @@ public class FileMgrTest {
     }
 
     @Test
-    public void filenameWithExt() {
-        final var filename = FileMgr.getFilename(new File("Test.ext"));
-        assertEquals("Test", filename);
-    }
-
-    @Test
-    public void filenameWithoutExt() {
-        final var filename = FileMgr.getFilename(new File("Test"));
-        assertEquals("Test", filename);
-    }
-
-    @Test
-    public void extOnly() {
-        final var filename = FileMgr.getFilename(new File(".ext"));
-        assertEquals("NONAME", filename);
-    }
-
-    @Test
-    public void extensionWithExt() {
-        final var filename = FileMgr.getExtension(new File("Test.ext"));
-        assertEquals("ext", filename);
-    }
-
-    @Test
-    public void extensionWithoutExt() {
-        final var filename = FileMgr.getExtension(new File("Test"));
-        assertEquals("NOEXT", filename);
-    }
-
-    @Test
-    public void extensionOnly() {
-        final var filename = FileMgr.getExtension(new File(".ext"));
-        assertEquals("ext", filename);
-    }
-
-    @Test
     public void moveToBackupFileExist() throws IOException {
         final var file = new File("src\\test\\resources\\file-backup.txt");
         file.createNewFile();

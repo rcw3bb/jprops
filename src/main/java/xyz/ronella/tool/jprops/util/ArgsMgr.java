@@ -301,9 +301,7 @@ final public class ArgsMgr {
                 addApplyOption(options, "Apply the merging to the properties file.");
                 addTargetOSOption(options);
             }
-            case MLINE -> {
-                //TODO: To be implemented.
-            }
+            case MLINE -> {/* TODO: To be implemented. */}
         }
     }
 
