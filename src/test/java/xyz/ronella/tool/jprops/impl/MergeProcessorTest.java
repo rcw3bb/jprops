@@ -30,4 +30,14 @@ public class MergeProcessorTest {
         assertDoesNotThrow(processor::process);
     }
 
+    @Test
+    public void mergeMoreFieldsOnDestinationProperties() throws MissingCommandException {
+        final var srcProps = Paths.get(".", "src", "test", "resources", "source2.properties").toFile();
+        final var dstProps = Paths.get(".", "src", "test", "resources", "destination3.properties").toFile();
+        final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
+                "-dp", dstProps.getAbsolutePath()}));
+
+        assertDoesNotThrow(processor::process);
+    }
+
 }

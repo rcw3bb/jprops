@@ -173,19 +173,23 @@ public class MergeProcessor  extends AbstractProcessor {
             throws JPropsException {
 
         try(final var gLOG = LOG.groupLog("mergeView")) {
-            final var srcValue = srcMetaGen.getMetadata().get(key).currentValue();
-            final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
+            final var srcPropMeta = Optional.ofNullable(srcMetaGen.getMetadata().get(key));
             var hasChange = false;
 
-            if (dstPropsMeta.isPresent()) {
-                final var dstValue = dstPropsMeta.get().currentValue();
-                if (!srcValue.equals(dstValue)) {
+            if (srcPropMeta.isPresent()) {
+                final var srcValue = srcPropMeta.get().currentValue();
+                final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
+
+                if (dstPropsMeta.isPresent()) {
+                    final var dstValue = dstPropsMeta.get().currentValue();
+                    if (!srcValue.equals(dstValue)) {
+                        hasChange = true;
+                        gLOG.info("\t[%s] will be updated from [%s] to [%s]", key, dstValue, srcValue);
+                    }
+                } else {
                     hasChange = true;
-                    gLOG.info("\t[%s] will be updated from [%s] to [%s]", key, dstValue, srcValue);
+                    gLOG.info("\t[%s] will be added with the value [%s]", key, srcValue);
                 }
-            } else {
-                hasChange = true;
-                gLOG.info("\t[%s] will be added with the value [%s]", key, srcValue);
             }
 
             return hasChange;
