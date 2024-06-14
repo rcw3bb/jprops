@@ -1,0 +1,8 @@
+ version: v1.25.0
+ ignore:
+  SNYK-JAVA-COMBEUST-174815:
+     - net.sourceforge.pmd:pmd-java@6.55.0 > net.sourceforge.pmd:pmd-core@6.55.0 > com.beust:jcommander@1.48:
+         reason: This is part of code quality test and not part of the package to be released.
+  SNYK-JAVA-ORGJSON-5962464:
+     - org.json:json@20230227:
+         reason: This is introduced by the snyk plugin and not part of the package to be released.
