@@ -10,9 +10,58 @@ import xyz.ronella.trivial.handy.OSType;
  * @param osType The operating system type.
  * @param lineNumber The line number.
  * @param lineType The line type.
+ * @param isComplete The isComplete property.
  *
  * @author Ron Webb
  * @since 1.0.0
  */
-public record PropsMeta(int count, String currentValue, String prevValue, OSType osType, int lineNumber, LineType lineType) {
+public record PropsMeta(int count, String currentValue, String prevValue, OSType osType,
+                        int lineNumber, LineType lineType, boolean isComplete) {
+
+    /**
+     * Set the isPrevComplete property.
+     * @param isComplete The isPrevComplete property.
+     * @return The PropsMeta instance.
+     *
+     * @since 1.1.0
+     */
+    public PropsMeta setComplete(boolean isComplete) {
+        return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
+                    this.lineNumber(), this.lineType(), isComplete);
+    }
+
+    /**
+     * Increment the count property.
+     * @return The PropsMeta instance.
+     *
+     * @since 1.1.0
+     */
+    public PropsMeta incrementCount() {
+        return new PropsMeta(this.count() + 1, this.currentValue(), this.prevValue(), this.osType(),
+                this.lineNumber(), this.lineType(), /*Current field becomes incomplete*/ false);
+    }
+
+    /**
+     * Set the currentValue property.
+     * @param value The current value.
+     * @return The PropsMeta instance.
+     *
+     * @since 1.1.0
+     */
+    public PropsMeta setCurrentValue(final String value) {
+        return new PropsMeta(this.count(), value, this.prevValue(), this.osType(), this.lineNumber(), this.lineType(),
+                /*Current field becomes incomplete*/ false);
+    }
+
+    /**
+     * Sync the prevValue property with the currentValue property.
+     * @return The PropsMeta instance.
+     *
+     * @since 1.1.0
+     */
+    public PropsMeta syncPrevValue() {
+        return new PropsMeta(this.count(), this.currentValue(), this.currentValue(), this.osType(), this.lineNumber(),
+                this.lineType(), this.isComplete());
+    }
+
 }

@@ -8,6 +8,7 @@ import xyz.ronella.trivial.handy.RegExMatcher;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -18,7 +19,9 @@ import java.util.regex.Pattern;
  */
 public class MetaGenerator {
 
-    private final static String MULTILINE_DELIM="^.*\\\\\\s*$";
+    private static final String MLINE_CONTINUE = "^\\s*((#.*)|)";
+    private static final String COMMENT_LINE = "\\s*#.*";
+    private static final String /*Non value pair key pattern*/ NON_VPK_PATTERN = "_LINE%d_";
 
     /**
      * The propsFile instance variable.
@@ -69,23 +72,18 @@ public class MetaGenerator {
             try (final var fileReader = new Scanner(propsFile)) {
                 final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
                 var lineNumber = 0;
+                String lastKey = null;
                 while (fileReader.hasNextLine()) {
                     ++lineNumber;
                     final var currentLine = fileReader.nextLine();
                     rawLine.append(currentLine);
-                    if (currentLine.matches(MULTILINE_DELIM)) {
-                        continue;
-                    }
-
                     final var matcher = RegExMatcher.find(valuePairPattern, rawLine.toString(), Pattern.MULTILINE);
-                    if (matcher.matches()) {
-                        final var key = matcher.group(1);
-                        final var value = matcher.group(2);
-                        updateMetadata(lineNumber, key, value);
-                    } else {
-                        updateMetadata(lineNumber, rawLine.toString());
-                    }
+                    lastKey = updateMetadata(lineNumber, matcher, rawLine, currentLine, lastKey).orElse(lastKey);
                     rawLine.clear();
+                }
+                if (lastKey != null) {
+                    // Final status update if lastKey was not completed.
+                    updateStatus(lastKey);
                 }
                 notLoaded = false;
             } catch (FileNotFoundException fnfe) {
@@ -98,18 +96,87 @@ public class MetaGenerator {
     /**
      * The updateMetadata method updates the metadata.
      * @param lineNumber The line number.
+     * @param matcher The matcher.
+     * @param rawLine The raw line.
+     * @param currentLine The current line.
+     * @param lastKey The last key.
+     * @return The key.
+     * @throws JPropsException When an error occurs.
+     */
+    protected Optional<String> updateMetadata(final int lineNumber,
+                                              final Matcher matcher,
+                                              final StringBuilderAppender rawLine,
+                                              final String currentLine,
+                                              final String lastKey) throws JPropsException {
+        Optional<String> output = Optional.empty();
+        if (matcher.matches()) {
+            final var key = matcher.group(1);
+            final var value = matcher.group(2);
+            if (lastKey != null) {
+                updateStatus(lastKey);
+            }
+            updateMetadata(lineNumber, key, value);
+            output = Optional.of(key);
+        } else if (!currentLine.matches(MLINE_CONTINUE)) {
+            updateMetadata(lastKey, currentLine);
+        }
+        else {
+            updateStatus(lastKey);
+            updateMetadata(lineNumber, rawLine.toString());
+        }
+        return output;
+    }
+
+    /**
+     * The updateStatus method updates the status.
+     * @param lastKey The last key.
+     */
+    protected void updateStatus(final String lastKey) throws JPropsException {
+        final var oldMetaData = propsMetadata.get(lastKey);
+        if (!oldMetaData.isComplete()) {
+            var newMetaData = oldMetaData.setComplete(true);
+            final var optPrevValue = Optional.ofNullable(newMetaData.prevValue());
+            propsMetadata.put(lastKey, newMetaData);
+            if (optPrevValue.isPresent()) {
+                validateValue(lastKey);
+            }
+            newMetaData = newMetaData.syncPrevValue();
+            propsMetadata.put(lastKey, newMetaData);
+        }
+    }
+
+    /**
+     * The updateMetadata method updates the metadata.
+     * @param lineNumber The line number.
      * @param key The key.
      * @param value The value.
      * @throws JPropsException When an error occurs.
      */
     protected void updateMetadata(final int lineNumber, final String key, final String value) throws JPropsException {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
-                .orElse(new PropsMeta(0, value, value, osType, lineNumber, LineType.VALUE_PAIR));
+                .orElse(new PropsMeta(0, /*Current value*/ value, /*Previous value*/ null, osType, lineNumber,
+                        LineType.VALUE_PAIR, /*Current is not complete initially*/ false));
 
-        validateValue(key, oldMetadata, value);
+        final var newMetaData = oldMetadata.incrementCount().setCurrentValue(value);
 
-        final var newMetaData = new PropsMeta(oldMetadata.count() + 1, oldMetadata.currentValue(),
-                oldMetadata.prevValue(), osType, oldMetadata.lineNumber(), oldMetadata.lineType());
+        propsMetadata.put(key, newMetaData);
+    }
+
+    /**
+     * The updateMetadata method updates the metadata.
+     * @param key The key.
+     * @param value The value.
+     *
+     * @since 1.1.0
+     */
+    protected void updateMetadata(final String key, final String value) {
+        final var oldMetadata = propsMetadata.get(key);
+
+        final var newValue = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
+        newValue.append(oldMetadata.currentValue());
+        newValue.append(value);
+
+        final var newMetaData = oldMetadata.setCurrentValue(newValue.toString());
 
         propsMetadata.put(key, newMetaData);
     }
@@ -120,9 +187,10 @@ public class MetaGenerator {
      * @param text The text.
      */
     protected void updateMetadata(final int lineNumber, final String text) {
-        final var key = String.format("_LINE%d_", lineNumber);
-        final var lineType = text.matches("\\s*#.*") ? LineType.COMMENT : LineType.TEXT;
-        final var metadata = new PropsMeta(1, text, null, osType, lineNumber, lineType);
+        final var key = String.format(NON_VPK_PATTERN, lineNumber);
+        final var lineType = text.matches(COMMENT_LINE) ? LineType.COMMENT : LineType.TEXT;
+        final var metadata = new PropsMeta(1, /*Current value*/ text, /*Previous value*/ null, osType,
+                lineNumber, lineType, /*Current is complete*/ true);
 
         propsMetadata.put(key, metadata);
     }
@@ -130,29 +198,35 @@ public class MetaGenerator {
     /**
      * The validateValue method validates the metadata.
      * @param key The key.
-     * @param metadata The metadata.
-     * @param value The value.
      * @throws JPropsException When an error occurs.
      */
-    protected void validateValue(final String key, final PropsMeta metadata, final String value)
+    protected void validateValue(final String key)
             throws JPropsException {
 
-        final var optPrevValue = Optional.ofNullable(metadata.prevValue());
+        final var optPropsMeta = Optional.ofNullable(this.propsMetadata.get(key));
+        if (optPropsMeta.isPresent()) {
+            final var propsMeta = optPropsMeta.get();
+            final var optPrevValue = Optional.ofNullable(propsMeta.prevValue());
+            final var optCurrentValue = Optional.ofNullable(propsMeta.currentValue());
 
-        if (optPrevValue.isPresent() && !optPrevValue.get().equals(value)) {
-            final var message = String.format(
-                            """
-                            -------------------------------------------------
-                            %s has different previous and current value
-                            ---[Previously Value]----------------------------
-                            %s
-                            ---[Current Value]-------------------------------
-                            %s
-                            -------------------------------------------------
-                            """,
-                    key, metadata.prevValue(), value);
+            if (propsMeta.isComplete()
+                    && optPrevValue.isPresent() && optCurrentValue.isPresent()
+                    && !optPrevValue.get().equals(optCurrentValue.get())) {
 
-            throw new ValueMismatchException(message);
+                final var message = String.format(
+                        """
+                                -------------------------------------------------
+                                %s has different previous and current value
+                                ---[Previously Value]----------------------------
+                                %s
+                                ---[Current Value]-------------------------------
+                                %s
+                                -------------------------------------------------
+                                """,
+                        key, propsMeta.prevValue(), optCurrentValue.get());
+
+                throw new ValueMismatchException(message);
+            }
         }
     }
 
