@@ -58,6 +58,35 @@ public class MetaGeneratorTest {
     }
 
     @Test
+    public void multiLines() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "multiline.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var expected = 4;
+        final var metadata = metaGen.getMetadata();
+        final var actual = metadata.values().stream()
+                .filter(___metadata -> ___metadata.lineType() == LineType.VALUE_PAIR)
+                .count();
+        final var l4PropsMeta = metadata.get("mline4 ");
+        final var l4LineEnding = l4PropsMeta.osType().getEOL().eol();
+        final var l4ExpectedValue = String.format(" ml4 line1 \\%sml4 line2 \\%sml4 line3", l4LineEnding, l4LineEnding);
+
+        assertEquals(expected, actual);
+        assertEquals(l4ExpectedValue, l4PropsMeta.currentValue());
+    }
+
+    @Test
+    public void multiLineField() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "multiline.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var metadata = metaGen.getMetadata();
+        final var everyThingMustBeMultiline = metadata.values().stream()
+                .filter(___metadata -> ___metadata.lineType() == LineType.VALUE_PAIR)
+                .map(PropsMeta::isMultiline).reduce(true, (___accl, ___item) -> ___accl && ___item);
+
+        assertTrue(everyThingMustBeMultiline);
+    }
+
+    @Test
     public void singleLineMismatch() {
         final var propsFile = Paths.get(".", "src", "test", "resources", "single-line-mismatch.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);

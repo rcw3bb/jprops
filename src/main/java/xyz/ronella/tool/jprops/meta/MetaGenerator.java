@@ -155,7 +155,9 @@ public class MetaGenerator {
     protected void updateMetadata(final int lineNumber, final String key, final String value) throws JPropsException {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
                 .orElse(new PropsMeta(0, /*Current value*/ value, /*Previous value*/ null, osType, lineNumber,
-                        LineType.VALUE_PAIR, /*Current is not complete initially*/ false));
+                        LineType.VALUE_PAIR,
+                        /*Current is not complete initially*/ false,
+                        /*Not multiline by default*/ false));
 
         final var newMetaData = oldMetadata.incrementCount().setCurrentValue(value);
 
@@ -176,7 +178,7 @@ public class MetaGenerator {
         newValue.append(oldMetadata.currentValue());
         newValue.append(value);
 
-        final var newMetaData = oldMetadata.setCurrentValue(newValue.toString());
+        final var newMetaData = oldMetadata.setCurrentValue(newValue.toString()).setMultiLine(true);
 
         propsMetadata.put(key, newMetaData);
     }
@@ -190,7 +192,7 @@ public class MetaGenerator {
         final var key = String.format(NON_VPK_PATTERN, lineNumber);
         final var lineType = text.matches(COMMENT_LINE) ? LineType.COMMENT : LineType.TEXT;
         final var metadata = new PropsMeta(1, /*Current value*/ text, /*Previous value*/ null, osType,
-                lineNumber, lineType, /*Current is complete*/ true);
+                lineNumber, lineType, /*Current is complete*/ true, /*Not multiline by default*/ false);
 
         propsMetadata.put(key, metadata);
     }

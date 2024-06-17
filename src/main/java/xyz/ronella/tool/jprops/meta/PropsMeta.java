@@ -16,7 +16,7 @@ import xyz.ronella.trivial.handy.OSType;
  * @since 1.0.0
  */
 public record PropsMeta(int count, String currentValue, String prevValue, OSType osType,
-                        int lineNumber, LineType lineType, boolean isComplete) {
+                        int lineNumber, LineType lineType, boolean isComplete, boolean isMultiline) {
 
     /**
      * Set the isPrevComplete property.
@@ -27,7 +27,7 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta setComplete(boolean isComplete) {
         return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
-                    this.lineNumber(), this.lineType(), isComplete);
+                    this.lineNumber(), this.lineType(), isComplete, this.isMultiline());
     }
 
     /**
@@ -38,7 +38,7 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta incrementCount() {
         return new PropsMeta(this.count() + 1, this.currentValue(), this.prevValue(), this.osType(),
-                this.lineNumber(), this.lineType(), /*Current field becomes incomplete*/ false);
+                this.lineNumber(), this.lineType(), /*Current field becomes incomplete*/ false, this.isMultiline());
     }
 
     /**
@@ -50,7 +50,7 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta setCurrentValue(final String value) {
         return new PropsMeta(this.count(), value, this.prevValue(), this.osType(), this.lineNumber(), this.lineType(),
-                /*Current field becomes incomplete*/ false);
+                /*Current field becomes incomplete*/ false, this.isMultiline());
     }
 
     /**
@@ -61,7 +61,19 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta syncPrevValue() {
         return new PropsMeta(this.count(), this.currentValue(), this.currentValue(), this.osType(), this.lineNumber(),
-                this.lineType(), this.isComplete());
+                this.lineType(), this.isComplete(), this.isMultiline());
+    }
+
+    /**
+     * Set the isMultiline property.
+     * @param isMultiline The isMultiline property.
+     * @return The PropsMeta instance.
+     *
+     * @since 1.1.0
+     */
+    public PropsMeta setMultiLine(boolean isMultiline) {
+        return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
+                this.lineNumber(), this.lineType(), this.isComplete(), isMultiline);
     }
 
 }
