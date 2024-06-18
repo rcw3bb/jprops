@@ -2,6 +2,7 @@ package xyz.ronella.tool.jprops.util;
 
 import xyz.ronella.tool.jprops.Command;
 import xyz.ronella.trivial.decorator.FileNomen;
+import xyz.ronella.trivial.handy.OSType;
 import xyz.ronella.trivial.handy.Require;
 import xyz.ronella.trivial.handy.RequireObject;
 
@@ -39,15 +40,17 @@ final public class FileMgr {
      * The getBackupDir method returns the backup directory.
      * @return The backup directory.
      */
-    private static File getBackupDir() {
-        final var appData = System.getenv("LOCALAPPDATA");
-        final var backupDir = new File(String.format("%s/%s/backup", appData, AppInfo.INSTANCE.getAppName()));
+    private static Optional<File> getBackupDir() {
+        final var appData = OSType.identify().getAppDataDir();
+        return appData.map(___appData -> {
+            final var backupDir = new File(String.format("%s/%s/backup", ___appData, AppInfo.INSTANCE.getAppName()));
 
-        if (!backupDir.exists()) {
-            backupDir.mkdirs();
-        }
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
+            }
 
-        return backupDir;
+            return backupDir;
+        });
     }
 
     /**
@@ -62,14 +65,16 @@ final public class FileMgr {
 
         if (file.exists()) {
             final var backupDir = getBackupDir();
-            final var fileNomen = new FileNomen(file);
-            final var filename = fileNomen.getFilename().orElse("NONAME");
-            final var extension = fileNomen.getExtension().orElse("properties");
-            final var timeElement = String.valueOf(System.currentTimeMillis());
-            final var backupFile = new File(backupDir, String.format("%s-%s-%s.%s", filename, command.getCode(),
-                    timeElement, extension));
-            Files.move(file.toPath(), backupFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
-            return Optional.of(backupFile);
+            if (backupDir.isPresent()) {
+                final var fileNomen = new FileNomen(file);
+                final var filename = fileNomen.getFilename().orElse("NONAME");
+                final var extension = fileNomen.getExtension().orElse("properties");
+                final var timeElement = String.valueOf(System.currentTimeMillis());
+                final var backupFile = new File(backupDir.get(), String.format("%s-%s-%s.%s", filename, command.getCode(),
+                        timeElement, extension));
+                Files.move(file.toPath(), backupFile.toPath(), StandardCopyOption.ATOMIC_MOVE);
+                return Optional.of(backupFile);
+            }
         }
 
         return Optional.empty();
@@ -91,7 +96,12 @@ final public class FileMgr {
 
         final var backup = moveToBackup(command, dest);
 
-        Files.move(src.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        if (backup.isPresent()) {
+            Files.move(src.toPath(), dest.toPath(), StandardCopyOption.ATOMIC_MOVE);
+        }
+        else {
+            throw new IOException("Failed to create backup file");
+        }
 
         return backup;
     }
