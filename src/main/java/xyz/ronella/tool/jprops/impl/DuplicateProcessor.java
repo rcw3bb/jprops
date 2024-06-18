@@ -65,7 +65,7 @@ public class DuplicateProcessor extends AbstractProcessor {
                         }
 
                         FileMgr.safeMove(argsMgr.getCommand(), tmpFile, argsMgr.getProps()).ifPresent(___backupFile ->
-                                gLOG.info("Back file created: %s", ___backupFile));
+                                gLOG.info("Backup file created: %s", ___backupFile));
                     } catch (IOException exception) {
                         throw new RuntimeException(exception);
                     }

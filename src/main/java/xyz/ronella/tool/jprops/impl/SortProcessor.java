@@ -47,13 +47,6 @@ public class SortProcessor extends AbstractProcessor {
         }
     }
 
-/*    private List<String> getKeys(final MetaGenerator metaGen) throws JPropsException {
-        return metaGen.getMetadata().entrySet().stream()
-                .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
-                .map(Map.Entry::getKey)
-                .toList();
-    }*/
-
     private void applySort() {
         try(final var gLOG = LOG.groupLog("applySort")) {
             try {
@@ -74,7 +67,7 @@ public class SortProcessor extends AbstractProcessor {
                         });
                     }
                     FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
-                            gLOG.info("Back file created: %s", ___backupFile));
+                            gLOG.info("Backup file created: %s", ___backupFile));
                 }
             }
             catch (IOException e) {

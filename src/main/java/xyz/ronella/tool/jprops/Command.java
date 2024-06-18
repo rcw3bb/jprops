@@ -34,10 +34,9 @@ public enum Command {
     MERGE("mrg"),
 
     /**
-     * The MLINE (i.e. Multiline) command.
+     * The BMLINE (i.e. Broken Multiline) command.
      */
-    MLINE("mli") //TODO: To be implemented.
-    ;
+    BMLINE("bml");
 
     private String code;
 

@@ -87,6 +87,27 @@ public class MetaGeneratorTest {
     }
 
     @Test
+    public void multiLineFix() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "multiline-single.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var metadata = metaGen.getMetadata();
+        final var optPropsMeta = metadata.values().stream().findFirst();
+
+        if (optPropsMeta.isPresent()) {
+            final var propsMeta = optPropsMeta.get();
+            assertTrue(propsMeta.isBrokenMLine());
+
+            final var lineEnding = propsMeta.osType().getEOL().eol();
+            final var fixedPropsMeta = propsMeta.fixBrokenMLine();
+            final var expected = String.format(" ml1 line1\\%sml1 line2\\%sml1 line3", lineEnding, lineEnding);
+            assertEquals(expected, fixedPropsMeta.currentValue());
+        }
+        else {
+            fail("Expected one entry.");
+        }
+    }
+
+    @Test
     public void brokenMultiline() throws JPropsException {
         final var propsFile = Paths.get(".", "src", "test", "resources", "multiline.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);

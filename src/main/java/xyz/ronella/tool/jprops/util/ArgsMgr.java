@@ -23,6 +23,7 @@ final public class ArgsMgr {
     private File dstProps;
     private boolean dedupe;
     private boolean apply;
+    private boolean fix;
     private transient boolean exit;
     private OSType targetOS;
     private ArgsMgr() {}
@@ -124,6 +125,22 @@ final public class ArgsMgr {
     }
 
     /**
+     * The isFix method returns true if the fix flag is set.
+     * @return True if the fix flag is set.
+     */
+    public boolean isFix() {
+        return fix;
+    }
+
+    /**
+     * The setFix method sets the fix flag.
+     * @param fix The fix flag.
+     */
+    public void setFix(boolean fix) {
+        this.fix = fix;
+    }
+
+    /**
      * The isApply method returns true if the apply flag is set.
      * @return True if the apply flag is set.
      */
@@ -190,6 +207,12 @@ final public class ArgsMgr {
         options.addOption(option);
     }
 
+    private static void addFixOption(final Options options, final String description) {
+        final var option = new Option("fix", false, description);
+        option.setRequired(false);
+        options.addOption(option);
+    }
+
     private static void addApplyOption(final Options options, final String description) {
         final var option = new Option("apply", false, description);
         option.setRequired(false);
@@ -216,6 +239,7 @@ final public class ArgsMgr {
                     help - The command for showing help information.
                     merge - The command for merging properties file.
                     sort - The command for sorting fields fields.
+                    bmline - The command for show broken multiline fields.
                     """);
         }
 
@@ -282,27 +306,40 @@ final public class ArgsMgr {
         }
 
         switch (command) {
-            case DUPLICATE -> {
-                addHelpOption(options);
-                addPropOption(options);
-                addDedupeOption(options);
-                addTargetOSOption(options);
-            }
-            case SORT -> {
-                addHelpOption(options);
-                addPropOption(options);
-                addApplyOption(options, "Apply the sorting to the properties file.");
-                addTargetOSOption(options);
-            }
-            case MERGE -> {
-                addHelpOption(options);
-                addSrcPropOption(options);
-                addDstPropOption(options);
-                addApplyOption(options, "Apply the merging to the properties file.");
-                addTargetOSOption(options);
-            }
-            case MLINE -> {/* TODO: To be implemented. */}
+            case DUPLICATE -> initDupOptions(options);
+            case SORT -> initSortOptions(options);
+            case MERGE -> initMergeOptions(options);
+            case BMLINE -> initBMLineOptions(options);
         }
+    }
+
+    private static void initDupOptions(final Options options) {
+        addHelpOption(options);
+        addPropOption(options);
+        addDedupeOption(options);
+        addTargetOSOption(options);
+    }
+
+    private static void initSortOptions(final Options options) {
+        addHelpOption(options);
+        addPropOption(options);
+        addApplyOption(options, "Apply the sorting to the properties file.");
+        addTargetOSOption(options);
+    }
+
+    private static void initMergeOptions(final Options options) {
+        addHelpOption(options);
+        addSrcPropOption(options);
+        addDstPropOption(options);
+        addApplyOption(options, "Apply the merging to the properties file.");
+        addTargetOSOption(options);
+    }
+
+    private static void initBMLineOptions(final Options options) {
+        addHelpOption(options);
+        addPropOption(options);
+        addTargetOSOption(options);
+        addFixOption(options, "Fix properties with broken multiline.");
     }
 
     private static void initPropsField(final ArgsMgr argManager, final CommandLine cmd) {
@@ -322,35 +359,51 @@ final public class ArgsMgr {
                 .ifPresentOrElse(argManager::setTargetOS, ()-> argManager.setTargetOS(OSType.identify()));
     }
 
+    private static void initFixField(final ArgsMgr argManager, final CommandLine cmd) {
+        if (cmd.hasOption("fix")) {
+            argManager.setFix(true);
+        }
+    }
+
     private static void initFields(final Command command, final ArgsMgr argManager, final CommandLine cmd) {
         switch (command) {
             case HELP -> {}
-            case DUPLICATE -> {
-                initPropsField(argManager, cmd);
-                initTargetOSField(argManager, cmd);
-
-                if (cmd.hasOption("dedupe")) {
-                    argManager.setDedupe(true);
-                }
-            }
-            case SORT -> {
-                initPropsField(argManager, cmd);
-                initApplyField(argManager, cmd);
-                initTargetOSField(argManager, cmd);
-            }
-            case MERGE -> {
-                Optional.ofNullable(cmd.getOptionValue("source"))
-                        .ifPresent(___properties -> argManager.setSrcProps(new File(___properties)));
-                Optional.ofNullable(cmd.getOptionValue("destination"))
-                        .ifPresent(___properties -> argManager.setDstProps(new File(___properties)));
-
-                initApplyField(argManager, cmd);
-                initTargetOSField(argManager, cmd);
-            }
-            case MLINE -> {
-                //TODO: To be implemented.
-            }
+            case DUPLICATE -> initDupFields(argManager, cmd);
+            case SORT -> initSortFields(argManager, cmd);
+            case MERGE -> initMergeFields(argManager, cmd);
+            case BMLINE -> initBMLineFields(argManager, cmd);
         }
+    }
+
+    private static void initDupFields(final ArgsMgr argManager, final CommandLine cmd) {
+        initPropsField(argManager, cmd);
+        initTargetOSField(argManager, cmd);
+
+        if (cmd.hasOption("dedupe")) {
+            argManager.setDedupe(true);
+        }
+    }
+
+    private static void initSortFields(final ArgsMgr argManager, final CommandLine cmd) {
+        initPropsField(argManager, cmd);
+        initApplyField(argManager, cmd);
+        initTargetOSField(argManager, cmd);
+    }
+
+    private static void initMergeFields(final ArgsMgr argManager, final CommandLine cmd) {
+        Optional.ofNullable(cmd.getOptionValue("source"))
+                .ifPresent(___properties -> argManager.setSrcProps(new File(___properties)));
+        Optional.ofNullable(cmd.getOptionValue("destination"))
+                .ifPresent(___properties -> argManager.setDstProps(new File(___properties)));
+
+        initApplyField(argManager, cmd);
+        initTargetOSField(argManager, cmd);
+    }
+
+    private static void initBMLineFields(final ArgsMgr argManager, final CommandLine cmd) {
+        initPropsField(argManager, cmd);
+        initFixField(argManager, cmd);
+        initTargetOSField(argManager, cmd);
     }
 
 }

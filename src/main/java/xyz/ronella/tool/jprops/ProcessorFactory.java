@@ -1,5 +1,6 @@
 package xyz.ronella.tool.jprops;
 
+import xyz.ronella.tool.jprops.impl.BrokenMLineProcessor;
 import xyz.ronella.tool.jprops.impl.DuplicateProcessor;
 import xyz.ronella.tool.jprops.impl.MergeProcessor;
 import xyz.ronella.tool.jprops.impl.SortProcessor;
@@ -25,10 +26,7 @@ final public class ProcessorFactory {
             case DUPLICATE -> new DuplicateProcessor(argsMgr);
             case SORT -> new SortProcessor(argsMgr);
             case MERGE -> new MergeProcessor(argsMgr);
-            case MLINE -> {
-                //TODO: To be implemented.
-                yield null;
-            }
+            case BMLINE -> new BrokenMLineProcessor(argsMgr);
             default -> throw new IllegalStateException("Unexpected command: " + argsMgr.getCommand());
         };
 

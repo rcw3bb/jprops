@@ -1,6 +1,10 @@
 package xyz.ronella.tool.jprops.meta;
 
+import xyz.ronella.trivial.decorator.StringBuilderAppender;
 import xyz.ronella.trivial.handy.OSType;
+
+import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * The PropsMeta class is a class that holds the metadata of the properties file.
@@ -26,8 +30,8 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      * @since 1.1.0
      */
     public PropsMeta setComplete(boolean isComplete) {
-        return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
-                    this.lineNumber(), this.lineType(), isComplete, this.isMultiline(), this.isBrokenMLine);
+        return new PropsMeta(this.count, this.currentValue, this.prevValue, this.osType,
+                    this.lineNumber, this.lineType, isComplete, this.isMultiline, this.isBrokenMLine);
     }
 
     /**
@@ -37,8 +41,8 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      * @since 1.1.0
      */
     public PropsMeta incrementCount() {
-        return new PropsMeta(this.count() + 1, this.currentValue(), this.prevValue(), this.osType(),
-                this.lineNumber(), this.lineType(), /*Current field becomes incomplete*/ false, this.isMultiline(),
+        return new PropsMeta(this.count + 1, this.currentValue, this.prevValue, this.osType,
+                this.lineNumber, this.lineType, /*Current field becomes incomplete*/ false, this.isMultiline,
                 this.isBrokenMLine);
     }
 
@@ -50,8 +54,8 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      * @since 1.1.0
      */
     public PropsMeta setCurrentValue(final String value) {
-        return new PropsMeta(this.count(), value, this.prevValue(), this.osType(), this.lineNumber(), this.lineType(),
-                /*Current field becomes incomplete*/ false, this.isMultiline(), isBrokenMLine);
+        return new PropsMeta(this.count, value, this.prevValue, this.osType, this.lineNumber, this.lineType,
+                /*Current field becomes incomplete*/ false, this.isMultiline, isBrokenMLine);
     }
 
     /**
@@ -61,8 +65,8 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      * @since 1.1.0
      */
     public PropsMeta syncPrevValue() {
-        return new PropsMeta(this.count(), this.currentValue(), this.currentValue(), this.osType(), this.lineNumber(),
-                this.lineType(), this.isComplete(), this.isMultiline(), isBrokenMLine);
+        return new PropsMeta(this.count, this.currentValue, this.currentValue, this.osType, this.lineNumber,
+                this.lineType, this.isComplete, this.isMultiline, isBrokenMLine);
     }
 
     /**
@@ -73,8 +77,8 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      * @since 1.1.0
      */
     public PropsMeta setMultiLine(boolean isMultiline) {
-        return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
-                this.lineNumber(), this.lineType(), this.isComplete(), isMultiline, isBrokenMLine);
+        return new PropsMeta(this.count, this.currentValue, this.prevValue, this.osType,
+                this.lineNumber, this.lineType, this.isComplete, isMultiline, isBrokenMLine);
     }
 
     /**
@@ -85,8 +89,43 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      * @since 1.1.0
      */
     public PropsMeta setBrokenMLine(boolean isBrokenMLine) {
-        return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
-                this.lineNumber(), this.lineType(), this.isComplete(), this.isMultiline(), isBrokenMLine);
+        return new PropsMeta(this.count, this.currentValue, this.prevValue, this.osType,
+                this.lineNumber, this.lineType, this.isComplete, this.isMultiline, isBrokenMLine);
     }
 
+    /**
+     * Fix the broken multi-line.
+     * @return The PropsMeta instance.
+     *
+     * @since 1.1.0
+     */
+    public PropsMeta fixBrokenMLine() {
+        PropsMeta output = this;
+        if (isMultiline && isBrokenMLine) {
+            try(final var scanner = new Scanner(this.currentValue)) {
+                final var sb = new StringBuilderAppender(
+                        ___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : "")
+                );
+                final var mlineVals = new ArrayList<String>();
+                while(scanner.hasNextLine()) {
+                    final var line = scanner.nextLine();
+                    mlineVals.add(line);
+                }
+
+                final var mlineSize = mlineVals.size();
+                for (var i = 0; i < mlineSize; i++) {
+                    final var line = mlineVals.get(i);
+                    if (line.trim().endsWith("\\") || i == (mlineSize - 1)) {
+                        sb.append(line);
+                    }
+                    else {
+                        sb.append(String.format("%s\\", line));
+                    }
+                }
+
+                output = output.setCurrentValue(sb.toString());
+            }
+        }
+        return output;
+    }
 }
