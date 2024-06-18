@@ -80,9 +80,9 @@ public class BrokenMLineProcessor  extends AbstractProcessor {
                 for (final var meta : metadata) {
                     gLOG.info("""
                             
-                            -----------------------
+                            --[KEY]----------------
                             [%s]
-                            -----------------------
+                            --[VALUE]--------------
                             %s
                             -----------------------
                             """, meta.getKey(),
@@ -98,20 +98,19 @@ public class BrokenMLineProcessor  extends AbstractProcessor {
             try {
                 bmLineProcess(gLOG, ___metaData -> {
                     try {
+                        gLOG.info("--- Fixing Broken Multiline Fields [BEGIN] ---");
                         final File tmpFile = FileMgr.createTmpFile(argsMgr.getProps());
                         gLOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
-
                         try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
                             ___metaData.forEach((___key, ___value) -> {
-                                writer(___key, ___value, writer);
+                                writer(gLOG, ___key, ___value, writer);
                             });
-
                         } catch (IOException e) {
                             gLOG.error(LOG.getStackTraceAsString(e));
                         }
-
                         FileMgr.safeMove(argsMgr.getCommand(), tmpFile, argsMgr.getProps()).ifPresent(___backupFile ->
                                 gLOG.info("Backup file created: %s", ___backupFile));
+                        gLOG.info("--- Fixing Broken Multiline Fields [END] -----");
                     } catch (IOException exception) {
                         throw new RuntimeException(exception);
                     }
@@ -123,10 +122,20 @@ public class BrokenMLineProcessor  extends AbstractProcessor {
         }
     }
 
-    private void writer(final String key, final PropsMeta value, final PrintWriter writer) {
+    private void writer(LoggerPlus.GroupLogger gLOG, final String key, final PropsMeta value, final PrintWriter writer) {
         PropsMeta proxyValue = value;
         if (value.isMultiline() && value.isBrokenMLine()) {
             proxyValue = value.fixBrokenMLine();
+
+            gLOG.info("""
+                    
+                    --[KEY]----------------
+                    [%s]
+                    --[FROM]---------------
+                    %s
+                    --[TO]-----------------
+                    %s
+                    """, key, value.currentValue(), proxyValue.currentValue());
         }
         outputWriter(writer, key, proxyValue);
     }
