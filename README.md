@@ -18,6 +18,20 @@ The `params` is one or more parameters to influence the behavior of the command.
 
 ## Usage
 
+### Managing Broken Multiline
+
+#### View broken multiline
+
+```
+jprops bmline -p <file>
+```
+
+#### Fixing broken multiline
+
+```
+jprops bmline -p <file> -fix
+```
+
 ### Managing Duplicates
 
 #### Viewing duplicates
@@ -56,8 +70,10 @@ jprops sort -p <file>
 
 #### Perform the sorting of fields
 
+All non-field-value entries will be removed.
+
 ```
-jprops sort -p <file> -apply
+jprops sort -p <file> -apply 
 ```
 
 ## Line Ending
