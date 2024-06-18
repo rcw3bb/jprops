@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
  */
 public class MetaGenerator {
 
+    private final static String MULTILINE_DELIM="\\";
     private static final String MLINE_CONTINUE = "^\\s*((#.*)|)";
     private static final String COMMENT_LINE = "\\s*#.*";
     private static final String /*Non value pair key pattern*/ NON_VPK_PATTERN = "_LINE%d_";
@@ -157,7 +158,8 @@ public class MetaGenerator {
                 .orElse(new PropsMeta(0, /*Current value*/ value, /*Previous value*/ null, osType, lineNumber,
                         LineType.VALUE_PAIR,
                         /*Current is not complete initially*/ false,
-                        /*Not multiline by default*/ false));
+                        /*Not multiline by default*/ false,
+                        /*Not broken multiline by default*/ false));
 
         final var newMetaData = oldMetadata.incrementCount().setCurrentValue(value);
 
@@ -173,14 +175,18 @@ public class MetaGenerator {
      */
     protected void updateMetadata(final String key, final String value) {
         final var oldMetadata = propsMetadata.get(key);
-
+        final var oldValue = oldMetadata.currentValue();
         final var newValue = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
-        newValue.append(oldMetadata.currentValue());
+
+        newValue.append(oldValue);
         newValue.append(value);
 
-        final var newMetaData = oldMetadata.setCurrentValue(newValue.toString()).setMultiLine(true);
+        var newMetadata = oldMetadata.setCurrentValue(newValue.toString()).setMultiLine(true);
+        if (newMetadata.isMultiline() && !newMetadata.isBrokenMLine() && !oldValue.trim().endsWith(MULTILINE_DELIM)) {
+            newMetadata = newMetadata.setBrokenMLine(true);
+        }
 
-        propsMetadata.put(key, newMetaData);
+        propsMetadata.put(key, newMetadata);
     }
 
     /**
@@ -192,7 +198,8 @@ public class MetaGenerator {
         final var key = String.format(NON_VPK_PATTERN, lineNumber);
         final var lineType = text.matches(COMMENT_LINE) ? LineType.COMMENT : LineType.TEXT;
         final var metadata = new PropsMeta(1, /*Current value*/ text, /*Previous value*/ null, osType,
-                lineNumber, lineType, /*Current is complete*/ true, /*Not multiline by default*/ false);
+                lineNumber, lineType, /*Current is complete*/ true, /*Not multiline by default*/ false,
+                /*Not broken multiline by default*/ false);
 
         propsMetadata.put(key, metadata);
     }

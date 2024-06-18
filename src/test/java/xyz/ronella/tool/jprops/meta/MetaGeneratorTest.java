@@ -87,6 +87,19 @@ public class MetaGeneratorTest {
     }
 
     @Test
+    public void brokenMultiline() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "multiline.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var metadata = metaGen.getMetadata();
+        final var brokenMultiline = metadata.entrySet().stream()
+                .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
+                .filter(___entrySet -> ___entrySet.getValue().isBrokenMLine())
+                .map(Map.Entry::getKey).toList();
+
+        assertEquals("mline1 ,mline2 ,mline3 ", String.join(",", brokenMultiline));
+    }
+
+    @Test
     public void singleLineMismatch() {
         final var propsFile = Paths.get(".", "src", "test", "resources", "single-line-mismatch.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);

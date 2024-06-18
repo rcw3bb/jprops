@@ -16,7 +16,7 @@ import xyz.ronella.trivial.handy.OSType;
  * @since 1.0.0
  */
 public record PropsMeta(int count, String currentValue, String prevValue, OSType osType,
-                        int lineNumber, LineType lineType, boolean isComplete, boolean isMultiline) {
+                        int lineNumber, LineType lineType, boolean isComplete, boolean isMultiline, boolean isBrokenMLine) {
 
     /**
      * Set the isPrevComplete property.
@@ -27,7 +27,7 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta setComplete(boolean isComplete) {
         return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
-                    this.lineNumber(), this.lineType(), isComplete, this.isMultiline());
+                    this.lineNumber(), this.lineType(), isComplete, this.isMultiline(), this.isBrokenMLine);
     }
 
     /**
@@ -38,7 +38,8 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta incrementCount() {
         return new PropsMeta(this.count() + 1, this.currentValue(), this.prevValue(), this.osType(),
-                this.lineNumber(), this.lineType(), /*Current field becomes incomplete*/ false, this.isMultiline());
+                this.lineNumber(), this.lineType(), /*Current field becomes incomplete*/ false, this.isMultiline(),
+                this.isBrokenMLine);
     }
 
     /**
@@ -50,7 +51,7 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta setCurrentValue(final String value) {
         return new PropsMeta(this.count(), value, this.prevValue(), this.osType(), this.lineNumber(), this.lineType(),
-                /*Current field becomes incomplete*/ false, this.isMultiline());
+                /*Current field becomes incomplete*/ false, this.isMultiline(), isBrokenMLine);
     }
 
     /**
@@ -61,7 +62,7 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta syncPrevValue() {
         return new PropsMeta(this.count(), this.currentValue(), this.currentValue(), this.osType(), this.lineNumber(),
-                this.lineType(), this.isComplete(), this.isMultiline());
+                this.lineType(), this.isComplete(), this.isMultiline(), isBrokenMLine);
     }
 
     /**
@@ -73,7 +74,19 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
      */
     public PropsMeta setMultiLine(boolean isMultiline) {
         return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
-                this.lineNumber(), this.lineType(), this.isComplete(), isMultiline);
+                this.lineNumber(), this.lineType(), this.isComplete(), isMultiline, isBrokenMLine);
+    }
+
+    /**
+     * Set the isBrokenMLine property.
+     * @param isBrokenMLine The isBrokenMLine property.
+     * @return The PropsMeta instance.
+     *
+     * @since 1.1.0
+     */
+    public PropsMeta setBrokenMLine(boolean isBrokenMLine) {
+        return new PropsMeta(this.count(), this.currentValue(), this.prevValue(), this.osType(),
+                this.lineNumber(), this.lineType(), this.isComplete(), this.isMultiline(), isBrokenMLine);
     }
 
 }
