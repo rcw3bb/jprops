@@ -108,6 +108,27 @@ public class MetaGeneratorTest {
     }
 
     @Test
+    public void emptyField() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "empty-field.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        final var metadata = metaGen.getMetadata();
+        final var optPropsMeta = metadata.values().stream().findFirst();
+
+        if (optPropsMeta.isPresent()) {
+            final var propsMeta = optPropsMeta.get();
+            assertFalse(propsMeta.isMultiline());
+            assertEquals(LineType.VALUE_PAIR, propsMeta.lineType());
+
+            final var fixedPropsMeta = propsMeta.fixBrokenMLine();
+            final var expected = "";
+            assertEquals(expected, fixedPropsMeta.currentValue());
+        }
+        else {
+            fail("Expected one entry.");
+        }
+    }
+
+    @Test
     public void brokenMultiline() throws JPropsException {
         final var propsFile = Paths.get(".", "src", "test", "resources", "multiline.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
