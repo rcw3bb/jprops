@@ -2,6 +2,12 @@
 
 [TOC]
 
+## 1.1.1 : 2024-06-20
+
+### Fix
+
+* Fix NPE for the uses cases not tested.
+
 ## 1.1.0 : 2024-06-19
 
 ### New
