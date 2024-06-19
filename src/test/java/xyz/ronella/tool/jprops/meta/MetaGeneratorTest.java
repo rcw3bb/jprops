@@ -176,4 +176,11 @@ public class MetaGeneratorTest {
         assertThrowsExactly(PropertiesNotFoundException.class, metaGen::getMetadata);
     }
 
+    @Test
+    public void startWithNonValuePari() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "valid-2.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertDoesNotThrow(metaGen::getMetadata);
+    }
+
 }

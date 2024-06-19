@@ -133,16 +133,19 @@ public class MetaGenerator {
      * @param lastKey The last key.
      */
     protected void updateStatus(final String lastKey) throws JPropsException {
-        final var oldMetaData = propsMetadata.get(lastKey);
-        if (!oldMetaData.isComplete()) {
-            var newMetaData = oldMetaData.setComplete(true);
-            final var optPrevValue = Optional.ofNullable(newMetaData.prevValue());
-            propsMetadata.put(lastKey, newMetaData);
-            if (optPrevValue.isPresent()) {
-                validateValue(lastKey);
+        final var optLastKey = Optional.ofNullable(lastKey);
+        if (optLastKey.isPresent()) {
+            final var oldMetaData = propsMetadata.get(lastKey);
+            if (!oldMetaData.isComplete()) {
+                var newMetaData = oldMetaData.setComplete(true);
+                final var optPrevValue = Optional.ofNullable(newMetaData.prevValue());
+                propsMetadata.put(lastKey, newMetaData);
+                if (optPrevValue.isPresent()) {
+                    validateValue(lastKey);
+                }
+                newMetaData = newMetaData.syncPrevValue();
+                propsMetadata.put(lastKey, newMetaData);
             }
-            newMetaData = newMetaData.syncPrevValue();
-            propsMetadata.put(lastKey, newMetaData);
         }
     }
 

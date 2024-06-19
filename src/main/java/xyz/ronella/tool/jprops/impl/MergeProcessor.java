@@ -143,28 +143,28 @@ public class MergeProcessor  extends AbstractProcessor {
             throws JPropsException {
 
         try(final var gLOG = LOG.groupLog("applyMerge")) {
-            final var srcPropMeta = srcMetaGen.getMetadata().get(key);
-            final var srcValue = srcPropMeta.currentValue();
-            final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
-
             var hasChange = false;
 
-            if (dstPropsMeta.isPresent()) {
-                final var dstValue = dstPropsMeta.get().currentValue();
-                if (!srcValue.equals(dstValue)) {
+            final var optSrcPropMeta = Optional.ofNullable(srcMetaGen.getMetadata().get(key));
+            if (optSrcPropMeta.isPresent()) {
+                final var srcPropMeta = optSrcPropMeta.get();
+                final var srcValue = srcPropMeta.currentValue();
+                final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
+                if (dstPropsMeta.isPresent()) {
+                    final var dstValue = dstPropsMeta.get().currentValue();
+                    if (!srcValue.equals(dstValue)) {
+                        hasChange = true;
+                        outputWriter(writer, key, srcPropMeta);
+                        gLOG.info("\t[%s] was updated from [%s] to [%s]", key, dstValue, srcValue);
+                    } else {
+                        outputWriter(writer, key, dstPropsMeta.get());
+                    }
+                } else {
                     hasChange = true;
                     outputWriter(writer, key, srcPropMeta);
-                    gLOG.info("\t[%s] was updated from [%s] to [%s]", key, dstValue, srcValue);
+                    gLOG.info("\t[%s] was added with the value [%s]", key, srcValue);
                 }
-                else {
-                    outputWriter(writer, key, dstPropsMeta.get());
-                }
-            } else {
-                hasChange = true;
-                outputWriter(writer, key, srcPropMeta);
-                gLOG.info("\t[%s] was added with the value [%s]", key, srcValue);
             }
-
             return hasChange;
         }
     }
