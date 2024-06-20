@@ -56,6 +56,8 @@ jprops merge -sp <source-file> -dp <destination-file>
 
 #### Doing the actual merge
 
+The fields from the source file always overrides the fields in destination file.
+
 ```
 jprops merge -sp <source-file> -dp <destination-file> -apply
 ```
