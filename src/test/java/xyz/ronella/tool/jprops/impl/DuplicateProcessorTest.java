@@ -3,9 +3,12 @@ package xyz.ronella.tool.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+import xyz.ronella.tool.jprops.TextWriter;
 import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 public class DuplicateProcessorTest {
@@ -32,4 +35,66 @@ public class DuplicateProcessorTest {
         assertDoesNotThrow(processor::process);
     }
 
+    @Test
+    public void testDedupe() throws IOException, MissingCommandException {
+        final var props = new File("src\\test\\resources\\duplicate-fields.properties");
+        props.createNewFile();
+
+        TextWriter.write(props, """
+                field1 = one
+                field2 = two
+                #comment1
+
+                field1 = one
+                field2 = two
+                field3 = line1\\
+                line2\\
+                line3
+
+                   #Comment2
+
+                field4 = four
+                field3 = line1\\
+                line2\\
+                line3
+                field5 = five
+                """);
+
+        assertTrue(props.exists());
+        final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p",
+                props.getAbsolutePath(), "-dedupe"}));
+
+        assertDoesNotThrow(processor::process);
+        props.delete();
+        assertFalse(props.exists());
+    }
+
+    @Test
+    public void testNothingToDedupe() throws IOException, MissingCommandException {
+        final var props = new File("src\\test\\resources\\duplicate-fields.properties");
+        props.createNewFile();
+
+        TextWriter.write(props, """
+                field5 = five
+                field2 = two
+                #comment1
+
+                field1 = one
+                field4 = four
+                field3 = line1\\
+                line2\\
+                line3
+
+                FIELD6 = six
+                FIELD7 = seven
+                """);
+
+        assertTrue(props.exists());
+        final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p",
+                props.getAbsolutePath(), "-dedupe"}));
+
+        assertDoesNotThrow(processor::process);
+        props.delete();
+        assertFalse(props.exists());
+    }
 }
