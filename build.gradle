@@ -41,7 +41,7 @@ snyk {
 }
 
 shadowJar {
-    archiveClassifier.set("exe")
+    archiveClassifier.set("fat")
     minimize {
         exclude(dependency('ch.qos.logback:.*:.*'))
     }
@@ -176,7 +176,6 @@ task preparePackage(dependsOn: ['jlink']) {
 tasks.findByPath('jlink').finalizedBy(preparePackage)
 
 task packWin(group: 'distribution', dependsOn: ['jlink']) {
-    group = "build"
     doLast {
         def jlinkOutputDir = Paths.get(buildDir.absolutePath, packageName)
         def outputFile = Paths.get(buildDir.absolutePath, 'pack', "${packageName}-win64.zip")
@@ -186,12 +185,22 @@ task packWin(group: 'distribution', dependsOn: ['jlink']) {
     }
 }
 
-task buildExec(group: 'distribution', dependsOn: [shadowJar]) {
-    def binDir = Paths.get(buildDir.absolutePath, 'bin').toFile()
+task packImage(group: 'distribution', dependsOn: ['buildExec']) {
+    doLast {
+        def imageOutputDir = Paths.get(buildDir.absolutePath, 'image')
+        def outputFile = Paths.get(buildDir.absolutePath, 'pack', "${packageName}-image.zip")
+        ant.zip(destfile: outputFile) {
+            fileset(dir: imageOutputDir)
+        }
+    }
+}
+
+task buildExec(group: 'build', dependsOn: [shadowJar]) {
+    def imageDir = Paths.get(buildDir.absolutePath, 'image').toFile()
 
     doFirst {
-        if (!binDir.exists()) {
-            binDir.mkdirs()
+        if (!imageDir.exists()) {
+            imageDir.mkdirs()
         }
     }
 
@@ -199,9 +208,14 @@ task buildExec(group: 'distribution', dependsOn: [shadowJar]) {
         exec {
             def nativeExec = CommandLocator.locateAsString("native-image")
             def libsDir = Paths.get(buildDir.absolutePath, 'libs').toFile().absolutePath
-            def fatJar = Paths.get(libsDir, "${packageName}-exe.jar").toFile().absolutePath
-            def outputFile = Paths.get(binDir.absolutePath, "${project.name}").toFile().absolutePath
+            def fatJar = Paths.get(libsDir, "${packageName}-fat.jar").toFile().absolutePath
+            def outputFile = Paths.get(imageDir.absolutePath, "${project.name}").toFile().absolutePath
             commandLine nativeExec.get(), '--no-fallback', '-jar', fatJar, '-o', outputFile
+        }
+        copy {
+            from(Paths.get(buildDir.absolutePath, "resources", "main"))
+            into(Paths.get(imageDir.absolutePath, "conf"))
+            include 'logback.xml'
         }
     }
 }
