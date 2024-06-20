@@ -17,29 +17,20 @@ gradlew clean check
 
 > The preceding command must be run from the location where you've cloned the repository.
 
-## Building
-
-Run the following command to build the application:
-
-```
-gradlew build
-```
-
-> The preceding command must be run from the location where you've cloned the repository.
-
-## Building Standalone Executable
+## Packaging Standalone Executable
 
 Run the following command to build the application executable:
 
 ```
-gradlew buildExec
+gradlew packImage
 ```
 
-> The executable will be available in the following directory:
+> The package will be available in following directory:
 >
 > ```
-> <REPO_DIR>\build\bin
+> <REPO_DIR>\build\pack
 > ```
+>
 > REPO_DIR is the location where you've cloned the repository.
 
 ## Packaging with Java
@@ -51,8 +42,6 @@ Run the following command to build the application:
 ```
 gradlew packWin
 ```
-
-> The preceding command must be run from the location where you've cloned the repository.
 
 > The package will be available in following directory:
 >
