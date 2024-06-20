@@ -3,9 +3,14 @@ package xyz.ronella.tool.jprops;
 import org.slf4j.LoggerFactory;
 import xyz.ronella.logging.LoggerPlus;
 import xyz.ronella.tool.jprops.meta.LineType;
+import xyz.ronella.tool.jprops.meta.MetaGenerator;
 import xyz.ronella.tool.jprops.meta.PropsMeta;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
+import xyz.ronella.tool.jprops.util.FileMgr;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Optional;
 
@@ -37,13 +42,78 @@ public abstract class AbstractProcessor implements Processor {
     @Override
     public void process() {
         LOG.info("Working on %s", argsMgr.getProps().getAbsolutePath());
-        processLogic();
+
+        final var metaGen = new MetaGenerator(argsMgr.getProps(), argsMgr.getTargetOS());
+
+        processLogic(); //TODO: Must be deleted.
+
+        try {
+            if (shouldProcess(metaGen)) {
+                if (mustPersist(metaGen)) {
+                    final File tmpFile = FileMgr.createTmpFile(argsMgr.getProps());
+                    LOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
+                    try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
+                        persistLogic(writer, metaGen);
+                    }
+                    FileMgr.safeMove(argsMgr.getCommand(), tmpFile, argsMgr.getProps()).ifPresent(___backupFile ->
+                            LOG.info("Backup file created: %s", ___backupFile));
+                } else {
+                    viewLogic(metaGen);
+                }
+            }
+            else {
+                LOG.info("Nothing to process.");
+            }
+        }
+        catch (JPropsException | IOException jpe) {
+            LOG.error(LOG.getStackTraceAsString(jpe));
+        }
+    }
+
+    /**
+     * The method that writes the properties to the output.
+     * @param metaGen The MetaGenerator instance.
+     * @return true if the update to the properties must be persisted.
+     *
+     * @since 1.2.0
+     */
+    public boolean mustPersist(final MetaGenerator metaGen) throws JPropsException {
+        return false;
+    }
+
+    /**
+     * The method that persist the properties update.
+     * @param metaGen The MetaGenerator instance.
+     * @since 1.2.0
+     */
+    public void persistLogic(final PrintWriter writer, final MetaGenerator metaGen) throws JPropsException {
+
+    }
+
+    /**
+     * The method that view analyzed by the processor.
+     * @param metaGen The MetaGenerator instance.
+     * @since 1.2.0
+     */
+    public void viewLogic(final MetaGenerator metaGen) throws JPropsException {
+
+    }
+
+    /**
+     * The method that determines if the command should be processed.
+     * @param metaGen The MetaGenerator instance.
+     * @return true if the command should be processed.
+     */
+    public boolean shouldProcess(final MetaGenerator metaGen) throws JPropsException {
+        return false;
     }
 
     /**
      * The logic that processes the command.
      */
-    protected abstract void processLogic();
+    protected void processLogic() {
+        //TODO: To be removed.
+    }
 
     /**
      * The method that writes the properties to the output.

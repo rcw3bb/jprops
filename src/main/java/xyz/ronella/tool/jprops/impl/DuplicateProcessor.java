@@ -1,6 +1,7 @@
 package xyz.ronella.tool.jprops.impl;
 
 import org.slf4j.LoggerFactory;
+
 import xyz.ronella.logging.LoggerPlus;
 import xyz.ronella.tool.jprops.JPropsException;
 import xyz.ronella.tool.jprops.meta.LineType;
@@ -8,16 +9,11 @@ import xyz.ronella.tool.jprops.AbstractProcessor;
 import xyz.ronella.tool.jprops.meta.MetaGenerator;
 import xyz.ronella.tool.jprops.meta.PropsMeta;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
-import xyz.ronella.tool.jprops.util.FileMgr;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * The DuplicateProcessor class is the implementation of the Processor interface for the duplicate command.
@@ -37,66 +33,37 @@ public class DuplicateProcessor extends AbstractProcessor {
         super(argsMgr);
     }
 
-    /**
-     * The method that processes the command.
-     */
     @Override
-    public void processLogic() {
-        if (argsMgr.isDedupe()) {
-            dedupe();
-        }
-        else {
-            duplicateView();
-        }
+    public boolean mustPersist(final MetaGenerator metaGen) throws JPropsException {
+        return argsMgr.isDedupe();
     }
 
-    private void dedupe() {
-        try(final var gLOG = LOG.groupLog("dedupe")) {
-            try {
-                duplicateProcess(gLOG, ___metaData -> {
-                    try {
-                        final File tmpFile = FileMgr.createTmpFile(argsMgr.getProps());
-                        gLOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
-
-                        try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
-                            ___metaData.forEach((___key, ___value) -> outputWriter(writer, ___key, ___value));
-                        } catch (IOException e) {
-                            gLOG.error(LOG.getStackTraceAsString(e));
-                        }
-
-                        FileMgr.safeMove(argsMgr.getCommand(), tmpFile, argsMgr.getProps()).ifPresent(___backupFile ->
-                                gLOG.info("Backup file created: %s", ___backupFile));
-                    } catch (IOException exception) {
-                        throw new RuntimeException(exception);
-                    }
-                });
-            }
-            catch (RuntimeException exception) {
-                gLOG.error(LOG.getStackTraceAsString(exception));
-            }
-        }
+    @Override
+    public void persistLogic(final PrintWriter writer, final MetaGenerator metaGen) throws JPropsException {
+        metaGen.getMetadata().forEach((___key, ___value) -> outputWriter(writer, ___key, ___value));
     }
 
-    private void duplicateProcess(final LoggerPlus.GroupLogger gLOG, final Consumer<Map<String, PropsMeta>> duplicateLogic) {
-        final var metaGen = new MetaGenerator(argsMgr.getProps(), argsMgr.getTargetOS());
-
-        try {
+    @Override
+    public void viewLogic(final MetaGenerator metaGen) throws JPropsException {
+        try(final var gLOG = LOG.groupLog("duplicateView")) {
             final var metaData = metaGen.getMetadata();
-            final var shouldProcess = metaData.values().stream()
-                    .filter(___value -> ___value.lineType() == LineType.VALUE_PAIR)
-                    .anyMatch(___value -> ___value.count() > 1);
+            final List<Map.Entry<String, PropsMeta>> metadata = metaData.entrySet().stream()
+                    .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
+                    .filter(___entrySet -> ___entrySet.getValue().count() > 1)
+                    .toList();
 
-            if (shouldProcess) {
-                duplicateLogic.accept(metaData);
+            for (final var meta : metadata) {
+                gLOG.error("[%s] field duplicated %d times.", meta.getKey(), meta.getValue().count());
             }
-            else {
-                gLOG.info("No duplicate found.");
-            }
-
-        } catch (JPropsException exception) {
-            gLOG.error(LOG.getStackTraceAsString(exception));
         }
+    }
 
+    @Override
+    public boolean shouldProcess(final MetaGenerator metaGen) throws JPropsException {
+        final var metaData = metaGen.getMetadata();
+        return metaData.values().stream()
+                .filter(___value -> ___value.lineType() == LineType.VALUE_PAIR)
+                .anyMatch(___value -> ___value.count() > 1);
     }
 
     /**
@@ -113,18 +80,4 @@ public class DuplicateProcessor extends AbstractProcessor {
         super.outputWriter(writer, key, value);
     }
 
-    private void duplicateView() {
-        try(final var gLOG = LOG.groupLog("duplicateView")) {
-            duplicateProcess(gLOG, ___metaData -> {
-                final List<Map.Entry<String, PropsMeta>> metadata = ___metaData.entrySet().stream()
-                        .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
-                        .filter(___entrySet -> ___entrySet.getValue().count() > 1)
-                        .toList();
-
-                for (final var meta : metadata) {
-                    gLOG.error("[%s] field duplicated %d times.", meta.getKey(), meta.getValue().count());
-                }
-            });
-        }
-    }
 }
