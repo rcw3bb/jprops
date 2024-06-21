@@ -228,19 +228,28 @@ final public class ArgsMgr {
 
     private static void helpInfo(final ArgsMgr argMgr, final Options options) {
         final var formatter = new HelpFormatter();
-        final var command = argMgr.getCommand();
-        final var appName = String.format("%s %s", AppInfo.INSTANCE.getAppName(), command.name().toLowerCase(Locale.ROOT));
-        formatter.printHelp(appName, options);
 
-        if (command == Command.HELP) {
-            System.out.println("""
-                    Commands available:
-                    duplicate - The command for managing duplicate fields.
-                    help - The command for showing help information.
-                    merge - The command for merging properties file.
-                    sort - The command for sorting fields fields.
-                    bmline - The command for show broken multiline fields.
-                    """);
+        final var optCommand = Optional.ofNullable(argMgr.getCommand());
+        final var commands = """
+                        Commands available:
+                        duplicate - The command for managing duplicate fields.
+                        help - The command for showing this help information.
+                        merge - The command for merging properties file.
+                        sort - The command for sorting fields fields.
+                        bmline - The command for show broken multiline fields.
+                        """;
+        if (optCommand.isPresent()) {
+            final var command = optCommand.get();
+
+            final var appName = String.format("%s %s", AppInfo.INSTANCE.getAppName(), command.name().toLowerCase(Locale.ROOT));
+            formatter.printHelp(appName, options);
+
+            if (command == Command.HELP) {
+                System.out.println(commands);
+            }
+        }
+        else {
+            System.out.println(commands);
         }
 
         argMgr.setShouldExit(true);
@@ -271,9 +280,8 @@ final public class ArgsMgr {
      * The build method creates an instance of the ArgsMgr.
      * @param args The command line arguments.
      * @return The ArgsMgr instance.
-     * @throws MissingCommandException When the command is missing.
      */
-    public static ArgsMgr build(final String[] args) throws MissingCommandException {
+    public static ArgsMgr build(final String[] args) {
         final var argManager = new ArgsMgr();
         final var options = new Options();
 
@@ -290,8 +298,10 @@ final public class ArgsMgr {
             } else {
                 initFields(argManager.getCommand(), argManager, cmd);
             }
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
+        } catch (ParseException exception) {
+            System.out.println(exception.getMessage());
+            helpInfo(argManager, options);
+        } catch (MissingCommandException mce) {
             helpInfo(argManager, options);
         }
 

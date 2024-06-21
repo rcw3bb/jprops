@@ -4,7 +4,6 @@ import xyz.ronella.logging.LoggerPlus;
 import org.slf4j.LoggerFactory;
 import xyz.ronella.tool.jprops.util.AppInfo;
 import xyz.ronella.tool.jprops.util.FileMgr;
-import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
 import xyz.ronella.trivial.handy.PathFinder;
 
@@ -56,8 +55,6 @@ final public class Main {
 
             final var processor = ProcessorFactory.createProcessor(argsMgr);
             processor.process();
-        } catch (MissingCommandException mce) {
-            LOGGER_PLUS.error("Missing command");
         }
     }
 
