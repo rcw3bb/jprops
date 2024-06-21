@@ -37,25 +37,33 @@ public abstract class AbstractProcessor implements Processor {
     }
 
     /**
+     * The method that returns the properties file.
+     * @return The properties file.
+     *
+     * @since 1.2.0
+     */
+    protected File getProps() {
+        LOG.info("Working on %s", argsMgr.getProps().getAbsolutePath());
+        return argsMgr.getProps();
+    }
+
+    /**
      * The method that processes the command.
      */
     @Override
     public void process() {
-        LOG.info("Working on %s", argsMgr.getProps().getAbsolutePath());
-
-        final var metaGen = new MetaGenerator(argsMgr.getProps(), argsMgr.getTargetOS());
-
-        processLogic(); //TODO: Must be deleted.
+        final var props = getProps();
+        final var metaGen = new MetaGenerator(props, argsMgr.getTargetOS());
 
         try {
             if (shouldProcess(metaGen)) {
                 if (mustPersist(metaGen)) {
-                    final File tmpFile = FileMgr.createTmpFile(argsMgr.getProps());
+                    final File tmpFile = FileMgr.createTmpFile(props);
                     LOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
                     try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
                         persistLogic(writer, metaGen);
                     }
-                    FileMgr.safeMove(argsMgr.getCommand(), tmpFile, argsMgr.getProps()).ifPresent(___backupFile ->
+                    FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
                             LOG.info("Backup file created: %s", ___backupFile));
                 } else {
                     viewLogic(metaGen);
@@ -71,49 +79,42 @@ public abstract class AbstractProcessor implements Processor {
     }
 
     /**
-     * The method that writes the properties to the output.
+     * The logic that determines if the needed update must be persisted.
      * @param metaGen The MetaGenerator instance.
-     * @return true if the update to the properties must be persisted.
+     * @return true if the needed update must be persisted.
+     * @throws JPropsException If there is an error processing the properties.
      *
      * @since 1.2.0
      */
-    public boolean mustPersist(final MetaGenerator metaGen) throws JPropsException {
-        return false;
-    }
+    abstract public boolean mustPersist(final MetaGenerator metaGen) throws JPropsException;
 
     /**
-     * The method that persist the properties update.
+     * The method that persist the necessary update on the properties.
      * @param metaGen The MetaGenerator instance.
+     * @throws JPropsException If there is an error processing the properties.
+     *
      * @since 1.2.0
      */
-    public void persistLogic(final PrintWriter writer, final MetaGenerator metaGen) throws JPropsException {
-
-    }
+    abstract public void persistLogic(final PrintWriter writer, final MetaGenerator metaGen) throws JPropsException;
 
     /**
-     * The method that view analyzed by the processor.
+     * The method that displays the target properties to be processed.
      * @param metaGen The MetaGenerator instance.
+     * @throws JPropsException If there is an error processing the properties.
+     *
      * @since 1.2.0
      */
-    public void viewLogic(final MetaGenerator metaGen) throws JPropsException {
-
-    }
+    abstract public void viewLogic(final MetaGenerator metaGen) throws JPropsException;
 
     /**
-     * The method that determines if the command should be processed.
+     * The method that determines if the processor should process the properties.
      * @param metaGen The MetaGenerator instance.
-     * @return true if the command should be processed.
+     * @return true if the processor should process the properties.
+     * @throws JPropsException If there is an error processing the properties.
+     *
+     * @since 1.2.0
      */
-    public boolean shouldProcess(final MetaGenerator metaGen) throws JPropsException {
-        return false;
-    }
-
-    /**
-     * The logic that processes the command.
-     */
-    protected void processLogic() {
-        //TODO: To be removed.
-    }
+    abstract public boolean shouldProcess(final MetaGenerator metaGen) throws JPropsException;
 
     /**
      * The method that writes the properties to the output.
@@ -133,6 +134,4 @@ public abstract class AbstractProcessor implements Processor {
                         ()-> writer.printf(/* Generic format */ "%s%s", currentValue, eol)
                 );
     }
-
-
 }

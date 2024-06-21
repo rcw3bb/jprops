@@ -22,7 +22,7 @@ import java.util.Map;
  * @author Ron Webb
  * @since 1.1.0
  */
-public class BrokenMLineProcessor  extends AbstractProcessor {
+public class BrokenMLineProcessor extends AbstractProcessor {
 
     private final static LoggerPlus LOG = new LoggerPlus(LoggerFactory.getLogger(BrokenMLineProcessor.class));
 
