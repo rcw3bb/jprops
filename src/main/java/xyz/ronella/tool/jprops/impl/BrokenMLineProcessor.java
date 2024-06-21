@@ -1,6 +1,7 @@
 package xyz.ronella.tool.jprops.impl;
 
 import org.slf4j.LoggerFactory;
+
 import xyz.ronella.logging.LoggerPlus;
 import xyz.ronella.tool.jprops.AbstractProcessor;
 import xyz.ronella.tool.jprops.JPropsException;
@@ -8,12 +9,10 @@ import xyz.ronella.tool.jprops.meta.LineType;
 import xyz.ronella.tool.jprops.meta.MetaGenerator;
 import xyz.ronella.tool.jprops.meta.PropsMeta;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
-import xyz.ronella.tool.jprops.util.FileMgr;
 
 import java.io.*;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * The BrokenMLineProcessor class is the implementation of the Processor interface for the broken_mline command.
@@ -37,88 +36,51 @@ public class BrokenMLineProcessor  extends AbstractProcessor {
     }
 
     @Override
-    protected void processLogic() {
-        if (argsMgr.isFix()) {
-            bmLineFix();
-        }
-        else {
-            bmLineView();
-        }
+    public boolean shouldProcess(MetaGenerator metaGen) throws JPropsException {
+        final var metaData = metaGen.getMetadata();
+        return !metaData.values().stream()
+                .filter(___value -> ___value.lineType() == LineType.VALUE_PAIR)
+                .filter(PropsMeta::isBrokenMLine)
+                .toList().isEmpty();
     }
 
-    private void bmLineProcess(final LoggerPlus.GroupLogger gLOG, final Consumer<Map<String, PropsMeta>> mbLineLogic) {
-        final var metaGen = new MetaGenerator(argsMgr.getProps(), argsMgr.getTargetOS());
+    @Override
+    public boolean mustPersist(MetaGenerator metaGen) throws JPropsException {
+        return argsMgr.isFix();
+    }
 
-        try {
+    @Override
+    public void viewLogic(MetaGenerator metaGen) throws JPropsException {
+        try (final var gLOG = LOG.groupLog("bmLineView")) {
             final var metaData = metaGen.getMetadata();
-            final var shouldProcess = !metaData.values().stream()
-                    .filter(___value -> ___value.lineType() == LineType.VALUE_PAIR)
-                    .filter(PropsMeta::isBrokenMLine)
-                    .toList().isEmpty();
+            final List<Map.Entry<String, PropsMeta>> metadata = metaData.entrySet().stream()
+                    .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
+                    .filter(___entrySet -> ___entrySet.getValue().isBrokenMLine())
+                    .toList();
 
-            if (shouldProcess) {
-                mbLineLogic.accept(metaData);
+            gLOG.info("--- Broken Multiline Fields [BEGIN] ---");
+            for (final var meta : metadata) {
+                gLOG.info("""
+                                                    
+                                --[KEY]----------------
+                                [%s]
+                                --[VALUE]--------------
+                                %s
+                                -----------------------
+                                """, meta.getKey(),
+                        meta.getValue().currentValue());
             }
-            else {
-                gLOG.info("No broken multiline found.");
-            }
-
-        } catch (JPropsException exception) {
-            gLOG.error(LOG.getStackTraceAsString(exception));
+            gLOG.info("--- Broken Multiline Fields [END] ------");
         }
     }
 
-    private void bmLineView() {
-        try(final var gLOG = LOG.groupLog("bmLineView")) {
-            bmLineProcess(gLOG, ___metaData -> {
-                final List<Map.Entry<String, PropsMeta>> metadata = ___metaData.entrySet().stream()
-                        .filter(___entrySet -> ___entrySet.getValue().lineType() == LineType.VALUE_PAIR)
-                        .filter(___entrySet -> ___entrySet.getValue().isBrokenMLine())
-                        .toList();
-
-                gLOG.info("--- Broken Multiline Fields [BEGIN] ---");
-                for (final var meta : metadata) {
-                    gLOG.info("""
-                            
-                            --[KEY]----------------
-                            [%s]
-                            --[VALUE]--------------
-                            %s
-                            -----------------------
-                            """, meta.getKey(),
-                            meta.getValue().currentValue());
-                }
-                gLOG.info("--- Broken Multiline Fields [END] ------");
-            });
-        }
-    }
-
-    private void bmLineFix() {
+    @Override
+    public void persistLogic(PrintWriter writer, MetaGenerator metaGen) throws JPropsException {
         try (final var gLOG = LOG.groupLog("bmLineFix")) {
-            try {
-                bmLineProcess(gLOG, ___metaData -> {
-                    try {
-                        gLOG.info("--- Fixing Broken Multiline Fields [BEGIN] ---");
-                        final File tmpFile = FileMgr.createTmpFile(argsMgr.getProps());
-                        gLOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
-                        try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
-                            ___metaData.forEach((___key, ___value) -> {
-                                writer(gLOG, ___key, ___value, writer);
-                            });
-                        } catch (IOException e) {
-                            gLOG.error(LOG.getStackTraceAsString(e));
-                        }
-                        FileMgr.safeMove(argsMgr.getCommand(), tmpFile, argsMgr.getProps()).ifPresent(___backupFile ->
-                                gLOG.info("Backup file created: %s", ___backupFile));
-                        gLOG.info("--- Fixing Broken Multiline Fields [END] -----");
-                    } catch (IOException exception) {
-                        throw new RuntimeException(exception);
-                    }
-                });
-            }
-            catch (RuntimeException exception) {
-                gLOG.error(LOG.getStackTraceAsString(exception));
-            }
+            final var metaData = metaGen.getMetadata();
+            gLOG.info("--- Fixing Broken Multiline Fields [BEGIN] ---");
+            metaData.forEach((___key, ___value) -> writer(gLOG, ___key, ___value, writer));
+            gLOG.info("--- Fixing Broken Multiline Fields [END] -----");
         }
     }
 
