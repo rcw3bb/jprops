@@ -1,18 +1,16 @@
 package xyz.ronella.tool.jprops.impl;
 
 import org.slf4j.LoggerFactory;
+
 import xyz.ronella.logging.LoggerPlus;
 import xyz.ronella.tool.jprops.AbstractProcessor;
 import xyz.ronella.tool.jprops.JPropsException;
 import xyz.ronella.tool.jprops.meta.LineType;
 import xyz.ronella.tool.jprops.meta.MetaGenerator;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
-import xyz.ronella.tool.jprops.util.FileMgr;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.function.Consumer;
+import java.util.List;
 
 /**
  * The SortProcessor class is the implementation of the Processor interface for the sort command.
@@ -34,89 +32,47 @@ public class SortProcessor extends AbstractProcessor {
         super(argsMgr);
     }
 
-    /**
-     * The method that processes the command.
-     */
     @Override
-    public void processLogic() {
-        if (argsMgr.isApply()) {
-            applySort();
-        }
-        else {
-            sortView();
-        }
+    public boolean shouldProcess(final MetaGenerator metaGen) throws JPropsException {
+        final var unsortedKeys = metaGen.getKeysByLineType(LineType.VALUE_PAIR);
+        final var sortedKeys = getSortedKeys(metaGen);
+        return !unsortedKeys.equals(sortedKeys);
     }
 
-    private void applySort() {
-        try(final var gLOG = LOG.groupLog("applySort")) {
-            try {
-                final var isSorted = sortView();
-                if (!isSorted) {
-                    gLOG.info("Applying sortView findings.");
-                    final var props = argsMgr.getProps();
-                    final var tmpFile = FileMgr.createTmpFile(props);
-                    gLOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
-
-                    try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
-                        sortProcess(gLOG, ___processRecord -> {
-                            try {
-                                applySortLogic(___processRecord.key(), ___processRecord.metaGen(), writer);
-                            } catch (JPropsException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
-                    }
-                    FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
-                            gLOG.info("Backup file created: %s", ___backupFile));
-                }
-            }
-            catch (IOException e) {
-                gLOG.error(LOG.getStackTraceAsString(e));
-            }
-        }
+    @Override
+    public boolean mustPersist(final MetaGenerator metaGen) throws JPropsException {
+        return argsMgr.isApply();
     }
 
-    private void applySortLogic(final String key, final MetaGenerator metaGen, final PrintWriter writer)
-            throws JPropsException {
-        try(final var gLOG = LOG.groupLog("applySort")) {
-            final var propsMeta = metaGen.getMetadata().get(key);
-            outputWriter(writer, key, propsMeta);
-            gLOG.info("\t%s", key);
-        }
+    private List<String> getSortedKeys(final MetaGenerator metaGen) throws JPropsException {
+        final var unsortedKeys = metaGen.getKeysByLineType(LineType.VALUE_PAIR);
+        return unsortedKeys.stream().sorted().toList();
     }
 
-    private boolean sortProcess(final LoggerPlus.GroupLogger gLOG, final Consumer<SortProcessRecord> sortLogic) {
-        final var metaGen = new MetaGenerator(argsMgr.getProps(), argsMgr.getTargetOS());
-
-        try {
-            final var unsortedKeys = metaGen.getKeysByLineType(LineType.VALUE_PAIR);
-            final var sortedKeys = unsortedKeys.stream().sorted().toList();
-            final var isSorted = unsortedKeys.equals(sortedKeys);
-
-            if (!isSorted) {
-                gLOG.info("--- Sorted Fields [BEGIN] ---");
-
-                for (final var key : sortedKeys) {
-                    sortLogic.accept(new SortProcessRecord(key, metaGen));
-                }
-
-                gLOG.info("--- Sorted Fields [END] -----");
-            } else {
-                gLOG.info("Nothing to do. Properties file is already sorted.");
-            }
-
-            return isSorted;
-        } catch (JPropsException e) {
-            gLOG.error(LOG.getStackTraceAsString(e));
-        }
-
-        return false;
-    }
-
-    private boolean sortView() {
+    @Override
+    public void viewLogic(final MetaGenerator metaGen) throws JPropsException {
         try(final var gLOG = LOG.groupLog("sortView")) {
-            return sortProcess(LOG.groupLog("sortView"), ___processRecord ->
-                    gLOG.info("\t%s", ___processRecord.key()));
+            gLOG.info("--- Sorted Fields View [BEGIN] ---");
+            final var sortedKeys = getSortedKeys(metaGen);
+            sortedKeys.forEach(___key -> gLOG.info("\t%s", ___key));
+            gLOG.info("--- Sorted Fields View [END] -----");
+        }
+    }
+
+    @Override
+    public void persistLogic(final PrintWriter writer, final MetaGenerator metaGen) throws JPropsException {
+        try(final var gLOG = LOG.groupLog("applySort")) {
+            gLOG.info("--- Applied Sorted Fields [BEGIN] ---");
+            final var sortedKeys = getSortedKeys(metaGen);
+
+            for (final var key : sortedKeys) {
+                final var propsMeta = metaGen.getMetadata().get(key);
+
+                outputWriter(writer, key, propsMeta);
+                gLOG.info("\t%s", key);
+            }
+
+            gLOG.info("--- Applied Sorted Fields [END] -----");
         }
     }
 }
