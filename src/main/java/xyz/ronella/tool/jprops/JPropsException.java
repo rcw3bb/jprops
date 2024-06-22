@@ -29,12 +29,4 @@ public class JPropsException extends Exception {
     public JPropsException(final String message) {
         super(message);
     }
-
-    /**
-     * The constructor with a message and a throwable.
-     * @param throwable The throwable.
-     */
-    public JPropsException(final Throwable throwable) {
-        super(throwable);
-    }
 }

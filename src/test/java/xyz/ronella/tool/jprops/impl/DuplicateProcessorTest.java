@@ -29,13 +29,6 @@ public class DuplicateProcessorTest {
     }
 
     @Test
-    public void fileNotFound() throws MissingCommandException {
-        final var propFile = Paths.get(".", "src", "test", "resources", "nonexistent.properties").toFile();
-        final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p", propFile.getAbsolutePath()}));
-        assertDoesNotThrow(processor::process);
-    }
-
-    @Test
     public void testDedupe() throws IOException, MissingCommandException {
         final var props = new File("src\\test\\resources\\duplicate-fields.properties");
         props.createNewFile();

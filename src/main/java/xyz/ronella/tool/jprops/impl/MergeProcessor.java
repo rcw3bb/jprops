@@ -61,7 +61,7 @@ public class MergeProcessor extends AbstractProcessor {
     }
 
     @Override
-    public void process() {
+    public void process() throws JPropsException {
         srcMetaGen = new MetaGenerator(argsMgr.getSrcProps(), argsMgr.getTargetOS());
         super.process();
     }

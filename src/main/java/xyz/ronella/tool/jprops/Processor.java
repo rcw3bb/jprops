@@ -13,6 +13,6 @@ public interface Processor {
      * The process method is responsible for executing the specific process logic.
      * Implementing classes must provide a concrete implementation for this method.
      */
-    void process();
+    void process() throws JPropsException;
 
 }

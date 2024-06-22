@@ -55,6 +55,8 @@ final public class Main {
 
             final var processor = ProcessorFactory.createProcessor(argsMgr);
             processor.process();
+        } catch (JPropsException jpe) {
+            LOGGER_PLUS.error(jpe.getMessage());
         }
     }
 

@@ -1,6 +1,7 @@
 package xyz.ronella.tool.jprops.meta;
 
 import xyz.ronella.tool.jprops.JPropsException;
+import xyz.ronella.trivial.decorator.FileNomen;
 import xyz.ronella.trivial.decorator.StringBuilderAppender;
 import xyz.ronella.trivial.handy.OSType;
 import xyz.ronella.trivial.handy.RegExMatcher;
@@ -71,6 +72,7 @@ public class MetaGenerator {
     public Map<String, PropsMeta> getMetadata() throws JPropsException {
         if (notLoaded) {
             try (final var fileReader = new Scanner(propsFile)) {
+                validatePropsFile();
                 final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
                 var lineNumber = 0;
                 String lastKey = null;
@@ -92,6 +94,13 @@ public class MetaGenerator {
             }
         }
         return propsMetadata;
+    }
+
+    private void validatePropsFile() throws JPropsException {
+        final var extName = new FileNomen(propsFile).getExtension().orElse("___none___");
+        if (!extName.equalsIgnoreCase("properties")) {
+            throw new FileExtensionException(String.format("%s is not a valid extension name.", extName));
+        }
     }
 
     /**

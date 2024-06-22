@@ -51,7 +51,7 @@ public abstract class AbstractProcessor implements Processor {
      * The method that processes the command.
      */
     @Override
-    public void process() {
+    public void process() throws JPropsException {
         final var props = getProps();
         final var metaGen = new MetaGenerator(props, argsMgr.getTargetOS());
 
@@ -73,8 +73,8 @@ public abstract class AbstractProcessor implements Processor {
                 LOG.info("Nothing to process.");
             }
         }
-        catch (JPropsException | IOException jpe) {
-            LOG.error(LOG.getStackTraceAsString(jpe));
+        catch (IOException jpe) {
+            throw new JPropsException(jpe.getMessage());
         }
     }
 
