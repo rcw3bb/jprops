@@ -25,7 +25,9 @@ import java.util.Optional;
  * @since 1.0.0
  */
 public class MergeProcessor extends AbstractProcessor {
+
     private final static LoggerPlus LOG = new LoggerPlus(LoggerFactory.getLogger(MergeProcessor.class));
+    private MetaGenerator srcMetaGen;
 
     /**
      * The constructor.
@@ -39,6 +41,8 @@ public class MergeProcessor extends AbstractProcessor {
     @Override
     protected File getProps() {
         final var dstProps = argsMgr.getDstProps();
+        final var srcProps = argsMgr.getSrcProps();
+
         LOG.info("""
                         
                         ----------------------------------------
@@ -46,7 +50,7 @@ public class MergeProcessor extends AbstractProcessor {
                         \t%s 
                         to 
                         \t%s
-                        ----------------------------------------""", argsMgr.getSrcProps().getAbsolutePath(), dstProps.getAbsolutePath());
+                        ----------------------------------------""", srcProps.getAbsolutePath(), dstProps.getAbsolutePath());
 
         return dstProps;
     }
@@ -56,10 +60,13 @@ public class MergeProcessor extends AbstractProcessor {
         return argsMgr.isApply();
     }
 
-    private List<MergeProcessRecord> getAllRecords() throws JPropsException {
-        final var targetOS = argsMgr.getTargetOS();
-        final var srcMetaGen = new MetaGenerator(argsMgr.getSrcProps(), targetOS);
-        final var dstMetaGen = new MetaGenerator(argsMgr.getDstProps(), targetOS);
+    @Override
+    public void process() {
+        srcMetaGen = new MetaGenerator(argsMgr.getSrcProps(), argsMgr.getTargetOS());
+        super.process();
+    }
+
+    private List<MergeProcessRecord> getAllRecords(final MetaGenerator dstMetaGen) throws JPropsException {
         final var srcKeys = srcMetaGen.getKeysByLineType(LineType.VALUE_PAIR);
         final var dstKeys = dstMetaGen.getKeysByLineType(LineType.VALUE_PAIR);
         final var allKeys = new LinkedHashSet<String>();
@@ -69,24 +76,22 @@ public class MergeProcessor extends AbstractProcessor {
         return allKeys.stream().map(___key -> new MergeProcessRecord(___key, srcMetaGen, dstMetaGen)).toList();
     }
 
-    private boolean processRecords(final MergeConsumer passThruLogic,
+    private boolean processRecords(final MetaGenerator dstMetaGen, final MergeConsumer passThruLogic,
                                    final MergeUpdate updateLogic,
                                    final MergeConsumer addLogic) throws JPropsException {
         boolean hasChange = false;
-        final var records = getAllRecords();
+        final var records = getAllRecords(dstMetaGen);
         try {
             for (final var record : records) {
                 final var key = record.key();
-                final var srcMetaGen = record.srcMetaGen();
-                final var dstMetaGen = record.dstMetaGen();
                 final var srcPropMeta = Optional.ofNullable(srcMetaGen.getMetadata().get(key));
                 if (srcPropMeta.isPresent()) {
                     final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
-                    executeLogics(key, srcPropMeta.get(), dstPropsMeta, passThruLogic, updateLogic, addLogic);
+                    hasChange = executeLogics(key, srcPropMeta.get(), dstPropsMeta, passThruLogic, updateLogic, addLogic);
                 }
             }
         }
-        catch(MergeChangeException e) {
+        catch(MergeChangeException ___) {
             hasChange = true;
         }
         return hasChange;
@@ -116,10 +121,10 @@ public class MergeProcessor extends AbstractProcessor {
     }
 
     @Override
-    public void persistLogic(PrintWriter writer, MetaGenerator metaGen) throws JPropsException {
+    public void persistLogic(PrintWriter writer, MetaGenerator dstMetaGen) throws JPropsException {
         try(final var gLOG = LOG.groupLog("applyMerge")) {
             gLOG.info("--- Apply Merge [BEGIN] ---");
-            processRecords(/*Pass through logic*/ (___key, ___propsMeta) -> outputWriter(writer, ___key, ___propsMeta),
+            processRecords(dstMetaGen, /*Pass through logic*/ (___key, ___propsMeta) -> outputWriter(writer, ___key, ___propsMeta),
                     /*Update logic*/ (___key, ___srcPropsMeta, ___dstPropsMeta) -> {
                         final var srcValue = ___srcPropsMeta.currentValue();
                         final var dstValue = ___dstPropsMeta.currentValue();
@@ -137,10 +142,10 @@ public class MergeProcessor extends AbstractProcessor {
     }
 
     @Override
-    public void viewLogic(MetaGenerator metaGen) throws JPropsException {
+    public void viewLogic(MetaGenerator dstMetaGen) throws JPropsException {
         try(final var gLOG = LOG.groupLog("mergeView")) {
             gLOG.info("--- Merge View [BEGIN] ---");
-            processRecords(/*Pass through logic*/ (___key, ___dstPropsMeta) -> {},
+            processRecords(dstMetaGen, /*Pass through logic*/ (___key, ___dstPropsMeta) -> {},
                     /*Update logic*/ (___key, ___srcPropsMeta, ___dstPropsMeta) -> {
                         final var srcValue = ___srcPropsMeta.currentValue();
                         final var dstValue = ___dstPropsMeta.currentValue();
@@ -155,8 +160,8 @@ public class MergeProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean shouldProcess(MetaGenerator metaGen) throws JPropsException {
-        return processRecords(/*Pass through logic*/ (___key, ___dstPropsMeta) -> {},
+    public boolean shouldProcess(MetaGenerator dstMetaGen) throws JPropsException {
+        return processRecords(dstMetaGen, /*Pass through logic*/ (___key, ___dstPropsMeta) -> {},
                 /*Update logic*/ (___key, ___srcPropsMeta, ___dstPropsMeta) -> {
                     throw new MergeChangeException();
                 },
