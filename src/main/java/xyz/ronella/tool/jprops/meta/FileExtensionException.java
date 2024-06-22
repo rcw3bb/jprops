@@ -9,7 +9,7 @@ import java.io.Serial;
  * The file extension must be .properties.
  *
  * @author Ron Webb
- * @since 1.0.0
+ * @since 1.2.0
  */
 public class FileExtensionException extends JPropsException {
     @Serial
