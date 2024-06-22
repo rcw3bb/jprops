@@ -5,20 +5,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import xyz.ronella.tool.jprops.TextWriter;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
-import xyz.ronella.tool.jprops.util.FileMgr;
-import xyz.ronella.tool.jprops.util.MissingCommandException;
-import xyz.ronella.trivial.decorator.TextFile;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 
 public class MergeProcessorTest {
 
     @Test
-    public void mergeProperties() throws MissingCommandException {
+    public void mergeProperties() {
         final var srcProps = Paths.get(".", "src", "test", "resources", "source.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "destination.properties").toFile();
         final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
@@ -28,7 +23,17 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void mergeNothingProperties() throws MissingCommandException {
+    public void mergeProperties2() {
+        final var srcProps = Paths.get(".", "src", "test", "resources", "source3.properties").toFile();
+        final var dstProps = Paths.get(".", "src", "test", "resources", "destination.properties").toFile();
+        final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
+                "-dp", dstProps.getAbsolutePath()}));
+
+        assertDoesNotThrow(processor::process);
+    }
+
+    @Test
+    public void mergeNothingProperties() {
         final var srcProps = Paths.get(".", "src", "test", "resources", "source2.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "destination2.properties").toFile();
         final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
@@ -38,7 +43,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void mergeMoreFieldsOnDestinationProperties() throws MissingCommandException {
+    public void mergeMoreFieldsOnDestinationProperties() {
         final var srcProps = Paths.get(".", "src", "test", "resources", "source2.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "destination3.properties").toFile();
         final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
@@ -48,7 +53,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void testApply() throws IOException, MissingCommandException {
+    public void testApply() throws IOException {
         final var dstProps = new File("src\\test\\resources\\dest-more-fields.properties");
         dstProps.createNewFile();
 
@@ -80,7 +85,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void testNothingApply() throws IOException, MissingCommandException {
+    public void testNothingApply() throws IOException {
         final var dstProps = new File("src\\test\\resources\\equal-fields.properties");
         dstProps.createNewFile();
 
