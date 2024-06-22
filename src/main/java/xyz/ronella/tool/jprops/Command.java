@@ -36,9 +36,14 @@ public enum Command {
     /**
      * The BMLINE (i.e. Broken Multiline) command.
      */
-    BMLINE("bml");
+    BMLINE("bml"),
 
-    private String code;
+    /**
+     * The INVALID command.
+     */
+    INVALID("___valid___");
+
+    private final String code;
 
     Command(final String code) {
         this.code = code;

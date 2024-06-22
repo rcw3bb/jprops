@@ -271,7 +271,7 @@ final public class ArgsMgr {
                 .map(___args -> ___args.toArray(new String[] {}))
                 .orElse(commandArg.isPresent() ? new String[] {} : args);
 
-        commandArg.ifPresent(___command -> argManager.setCommand(Command.of(___command).get()));
+        commandArg.ifPresent(___command -> argManager.setCommand(Command.of(___command).orElse(Command.INVALID)));
 
         return newArgs;
     }
@@ -292,11 +292,14 @@ final public class ArgsMgr {
             final var newArgs = prepareArgs(argManager, args);
             initOptions(argManager, options);
 
-            cmd = parser.parse(options, newArgs);
-            if (Command.HELP == argManager.getCommand()) {
-                helpInfo(argManager, options);
-            } else {
-                initFields(argManager.getCommand(), argManager, cmd);
+            final var command = argManager.getCommand();
+            if (Command.INVALID != command) {
+                cmd = parser.parse(options, newArgs);
+                if (Command.HELP == command) {
+                    helpInfo(argManager, options);
+                } else {
+                    initFields(argManager.getCommand(), argManager, cmd);
+                }
             }
         } catch (ParseException exception) {
             System.out.println(exception.getMessage());
