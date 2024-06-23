@@ -140,9 +140,12 @@ If not provided the default it uses the system line ending.
 
 The supported parameters for the `-os` is as follows:
 
-* Windows
+* AIX 
 * Linux
 * Mac
+* Solaris
+* Unix
+* Windows
 
 ## License
 
