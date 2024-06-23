@@ -2,6 +2,17 @@
 
 [TOC]
 
+## 1.2.0: 2024-06-24
+
+### New 
+
+* Logback configuration is now part of the distribution.
+* Show the available commands if not command was provided.
+
+### Update
+
+* DRYed the Processor implementations.
+
 ## 1.1.1 : 2024-06-20
 
 ### Fix
