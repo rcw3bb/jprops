@@ -221,7 +221,7 @@ final public class ArgsMgr {
 
     private static void addTargetOSOption(final Options options) {
         final var option = new Option("os", "target-os", true
-                , "The target OS (i.e. linux, windows or mac) to which the line ending will be based on. Default is the current OS.");
+                , "The target OS (i.e. aix, linux, mac, solaris, unix, or windows) to which the line ending will be based on. Default is the current OS.");
         option.setRequired(false);
         options.addOption(option);
     }
