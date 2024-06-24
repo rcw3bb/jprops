@@ -2,6 +2,11 @@
 
 [TOC]
 
+## 1.2.1: 2024-06-24
+
+### Fix
+* Logging stops when it reaches the max file size.
+
 ## 1.2.0: 2024-06-24
 
 ### New 
