@@ -8,7 +8,9 @@ import xyz.ronella.trivial.handy.OSType;
 import xyz.ronella.trivial.handy.RegExMatcher;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,7 +42,7 @@ public class MetaGenerator {
      * The osType instance variable.
      */
     protected transient final OSType osType;
-
+    protected transient final Charset encoding;
     private transient final String valuePairPattern;
     private transient boolean notLoaded;
 
@@ -49,12 +51,13 @@ public class MetaGenerator {
      * @param propsFile The properties file.
      * @param osType The operating system type.
      */
-    public MetaGenerator(final File propsFile, final OSType osType) {
+    public MetaGenerator(final File propsFile, final OSType osType, final Charset encoding) {
         this.propsFile = propsFile;
         this.propsMetadata = new LinkedHashMap<>();
         this.osType = Optional.ofNullable(osType).orElseGet(() -> OSType.of(new TextFile(propsFile).getEndOfLine()));
         this.valuePairPattern = "^(\\s*[a-zA-Z_].*?)=((.*(" + this.osType.getEOL().eol() + ")?)*?)$";
         this.notLoaded = true;
+        this.encoding = encoding;
     }
 
     /**
@@ -62,7 +65,7 @@ public class MetaGenerator {
      * @param propsFile The properties file.
      */
     public MetaGenerator(final File propsFile) {
-        this(propsFile, OSType.of(new TextFile(propsFile).getEndOfLine()));
+        this(propsFile, OSType.of(new TextFile(propsFile).getEndOfLine()), StandardCharsets.UTF_8);
     }
 
     /**
@@ -72,7 +75,7 @@ public class MetaGenerator {
      */
     public Map<String, PropsMeta> getMetadata() throws JPropsException {
         if (notLoaded) {
-            try (final var fileReader = new Scanner(propsFile)) {
+            try (final var fileReader = new Scanner(propsFile, encoding)) {
                 validatePropsFile();
                 final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
                 var lineNumber = 0;
@@ -90,8 +93,8 @@ public class MetaGenerator {
                     updateStatus(lastKey);
                 }
                 notLoaded = false;
-            } catch (FileNotFoundException fnfe) {
-                throw new PropertiesNotFoundException(fnfe.getMessage());
+            } catch (IOException ioe) {
+                throw new PropertiesNotFoundException(ioe.getMessage());
             }
         }
         return propsMetadata;

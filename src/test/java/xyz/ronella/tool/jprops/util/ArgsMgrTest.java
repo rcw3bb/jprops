@@ -7,6 +7,7 @@ import xyz.ronella.tool.jprops.Command;
 import xyz.ronella.trivial.handy.OSType;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
@@ -50,6 +51,20 @@ public class ArgsMgrTest {
         final var props = "non-existent.properties";
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-os", "invalid").toArray(new String[] {}));
         assertNull(argsMgr.getTargetOS());
+    }
+
+    @Test
+    public void validEncoding() {
+        final var props = "non-existent.properties";
+        final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-encoding", "utf-8").toArray(new String[] {}));
+        assertEquals(StandardCharsets.UTF_8, argsMgr.getEncoding());
+    }
+
+    @Test
+    public void invalidEncoding() {
+        final var props = "non-existent.properties";
+        final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-encoding", "1234").toArray(new String[] {}));
+        assertNull(argsMgr.getEncoding());
     }
 
 }

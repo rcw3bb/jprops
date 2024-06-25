@@ -9,6 +9,7 @@ import xyz.ronella.trivial.decorator.TextFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 public class DuplicateProcessorTest {
@@ -64,6 +65,25 @@ public class DuplicateProcessorTest {
     }
 
     @Test
+    public void testDedupeUTF16() throws IOException, MissingCommandException {
+        final var utf16Props = new File("src\\test\\resources\\duplicate-linux-utf16.properties");
+        final var utf16TextFile = new TextFile(utf16Props, StandardCharsets.UTF_16LE);
+        final var props = new File("src\\test\\resources\\duplicate-fields-dummy.properties");
+        props.createNewFile();
+        final var textFile = new TextFile(props, StandardCharsets.UTF_16LE);
+
+        textFile.setText(utf16TextFile.getText());
+
+        assertTrue(props.exists());
+        final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p",
+                props.getAbsolutePath(), "-dedupe", "-encoding", StandardCharsets.UTF_16LE.name()}));
+
+        assertDoesNotThrow(processor::process);
+        props.delete();
+        assertFalse(props.exists());
+    }
+
+    @Test
     public void testNothingToDedupe() throws IOException, MissingCommandException {
         final var props = new File("src\\test\\resources\\duplicate-fields.properties");
         props.createNewFile();
@@ -90,5 +110,13 @@ public class DuplicateProcessorTest {
         assertDoesNotThrow(processor::process);
         props.delete();
         assertFalse(props.exists());
+    }
+
+    @Test
+    public void testLinuxUTF16() throws IOException, MissingCommandException {
+        final var propFile = Paths.get(".", "src", "test", "resources", "duplicate-linux-utf16.properties").toFile();
+        final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p", propFile.getAbsolutePath(), "-encoding", StandardCharsets.UTF_16LE.name()}));
+
+        assertDoesNotThrow(processor::process);
     }
 }

@@ -1,10 +1,15 @@
 package xyz.ronella.tool.jprops.util;
 
 import org.apache.commons.cli.*;
+import org.slf4j.LoggerFactory;
+import xyz.ronella.logging.LoggerPlus;
 import xyz.ronella.tool.jprops.Command;
 import xyz.ronella.trivial.handy.OSType;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
@@ -17,6 +22,8 @@ import java.util.Optional;
  */
 final public class ArgsMgr {
 
+    private final static LoggerPlus LOGGER_PLUS = new LoggerPlus(LoggerFactory.getLogger(ArgsMgr.class));
+
     private Command command;
     private File props;
     private File srcProps;
@@ -26,6 +33,7 @@ final public class ArgsMgr {
     private boolean fix;
     private transient boolean exit;
     private OSType targetOS;
+    private Charset encoding;
     private ArgsMgr() {}
 
     /**
@@ -172,6 +180,26 @@ final public class ArgsMgr {
         this.targetOS = targetOS;
     }
 
+    /**
+     * The getEncoding method returns the encoding.
+     * @return The encoding.
+     *
+     * @since 1.3.0
+     */
+    public Charset getEncoding() {
+        return encoding;
+    }
+
+    /**
+     * The setEncoding method sets the encoding.
+     * @param encoding The encoding.
+     *
+     * @since 1.3.0
+     */
+    public void setEncoding(Charset encoding) {
+        this.encoding = encoding;
+    }
+
     private static void addPropOption(final Options options) {
         final var option = new Option("p", "properties", true
                 , "The properties file.");
@@ -222,6 +250,13 @@ final public class ArgsMgr {
     private static void addTargetOSOption(final Options options) {
         final var option = new Option("os", "target-os", true
                 , "The target OS (i.e. aix, linux, mac, solaris, unix, or windows) to which the line ending will be based on. Default is the current OS.");
+        option.setRequired(false);
+        options.addOption(option);
+    }
+
+    private static void addEncodingOption(final Options options) {
+        final var option = new Option("encoding", true
+                , "The encoding to use. Default is UTF-8.");
         option.setRequired(false);
         options.addOption(option);
     }
@@ -331,6 +366,7 @@ final public class ArgsMgr {
         addPropOption(options);
         addDedupeOption(options);
         addTargetOSOption(options);
+        addEncodingOption(options);
     }
 
     private static void initSortOptions(final Options options) {
@@ -338,6 +374,7 @@ final public class ArgsMgr {
         addPropOption(options);
         addApplyOption(options, "Apply the sorting to the properties file.");
         addTargetOSOption(options);
+        addEncodingOption(options);
     }
 
     private static void initMergeOptions(final Options options) {
@@ -346,6 +383,7 @@ final public class ArgsMgr {
         addDstPropOption(options);
         addApplyOption(options, "Apply the merging to the properties file.");
         addTargetOSOption(options);
+        addEncodingOption(options);
     }
 
     private static void initBMLineOptions(final Options options) {
@@ -353,6 +391,7 @@ final public class ArgsMgr {
         addPropOption(options);
         addTargetOSOption(options);
         addFixOption(options, "Fix properties with broken multiline.");
+        addEncodingOption(options);
     }
 
     private static void initPropsField(final ArgsMgr argManager, final CommandLine cmd) {
@@ -372,6 +411,18 @@ final public class ArgsMgr {
                 .ifPresent(argManager::setTargetOS);
     }
 
+    private static void initEncodingField(final ArgsMgr argManager, final CommandLine cmd) {
+        Optional.ofNullable(cmd.getOptionValue("encoding"))
+                .ifPresentOrElse(___encoding -> {
+                    try {
+                        argManager.setEncoding(Charset.forName(___encoding));
+                    } catch (UnsupportedCharsetException exception) {
+                        LOGGER_PLUS.error("%s is not a supported encoding.", ___encoding);
+                        argManager.setShouldExit(true);
+                    }},
+                        ()-> argManager.setEncoding(StandardCharsets.UTF_8));
+    }
+
     private static void initFixField(final ArgsMgr argManager, final CommandLine cmd) {
         if (cmd.hasOption("fix")) {
             argManager.setFix(true);
@@ -389,6 +440,7 @@ final public class ArgsMgr {
     }
 
     private static void initDupFields(final ArgsMgr argManager, final CommandLine cmd) {
+        initEncodingField(argManager, cmd);
         initPropsField(argManager, cmd);
         initTargetOSField(argManager, cmd);
 
@@ -398,6 +450,7 @@ final public class ArgsMgr {
     }
 
     private static void initSortFields(final ArgsMgr argManager, final CommandLine cmd) {
+        initEncodingField(argManager, cmd);
         initPropsField(argManager, cmd);
         initApplyField(argManager, cmd);
         initTargetOSField(argManager, cmd);
@@ -409,11 +462,13 @@ final public class ArgsMgr {
         Optional.ofNullable(cmd.getOptionValue("destination"))
                 .ifPresent(___properties -> argManager.setDstProps(new File(___properties)));
 
+        initEncodingField(argManager, cmd);
         initApplyField(argManager, cmd);
         initTargetOSField(argManager, cmd);
     }
 
     private static void initBMLineFields(final ArgsMgr argManager, final CommandLine cmd) {
+        initEncodingField(argManager, cmd);
         initPropsField(argManager, cmd);
         initFixField(argManager, cmd);
         initTargetOSField(argManager, cmd);

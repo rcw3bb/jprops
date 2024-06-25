@@ -53,14 +53,14 @@ public abstract class AbstractProcessor implements Processor {
     @Override
     public void process() throws JPropsException {
         final var props = getProps();
-        final var metaGen = new MetaGenerator(props, argsMgr.getTargetOS());
+        final var metaGen = new MetaGenerator(props, argsMgr.getTargetOS(), argsMgr.getEncoding());
 
         try {
             if (shouldProcess(metaGen)) {
                 if (mustPersist(metaGen)) {
                     final File tmpFile = FileMgr.createTmpFile(props);
                     LOG.debug("Temp file created: %s", tmpFile.getAbsolutePath());
-                    try (final var writer = new PrintWriter(new FileWriter(tmpFile))) {
+                    try (final var writer = new PrintWriter(new FileWriter(tmpFile, argsMgr.getEncoding()))) {
                         persistLogic(writer, metaGen);
                     }
                     FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
