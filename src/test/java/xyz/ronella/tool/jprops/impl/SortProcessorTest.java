@@ -9,6 +9,7 @@ import xyz.ronella.trivial.decorator.TextFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
 public class SortProcessorTest {
@@ -79,6 +80,33 @@ public class SortProcessorTest {
         assertTrue(props.exists());
         final var processor = new SortProcessor(ArgsMgr.build(new String[] {"sort", "-p",
                 props.getAbsolutePath(), "-apply"}));
+
+        assertDoesNotThrow(processor::process);
+        props.delete();
+        assertFalse(props.exists());
+    }
+
+    @Test
+    public void testLinuxUTF16() throws IOException, MissingCommandException {
+        final var propFile = Paths.get(".", "src", "test", "resources", "unsorted-linux-utf16.properties").toFile();
+        final var processor = new SortProcessor(ArgsMgr.build(new String[] {"sort", "-p", propFile.getAbsolutePath(), "-encoding", StandardCharsets.UTF_16LE.name()}));
+
+        assertDoesNotThrow(processor::process);
+    }
+
+    @Test
+    public void testApplyUTF16() throws IOException, MissingCommandException {
+        final var utf16Props = new File("src\\test\\resources\\unsorted-linux-utf16.properties");
+        final var utf16TextFile = new TextFile(utf16Props, StandardCharsets.UTF_16LE);
+        final var props = new File("src\\test\\resources\\unsorted-fields-dummy.properties");
+        props.createNewFile();
+        final var textFile = new TextFile(props, StandardCharsets.UTF_16LE);
+
+        textFile.setText(utf16TextFile.getText());
+
+        assertTrue(props.exists());
+        final var processor = new SortProcessor(ArgsMgr.build(new String[] {"sort", "-p",
+                props.getAbsolutePath(), "-apply", "-encoding", StandardCharsets.UTF_16LE.name()}));
 
         assertDoesNotThrow(processor::process);
         props.delete();
