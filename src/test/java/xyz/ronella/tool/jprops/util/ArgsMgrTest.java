@@ -49,7 +49,7 @@ public class ArgsMgrTest {
     public void invalidOS() throws MissingCommandException {
         final var props = "non-existent.properties";
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-os", "invalid").toArray(new String[] {}));
-        assertNotNull(argsMgr.getTargetOS());
+        assertNull(argsMgr.getTargetOS());
     }
 
 }

@@ -3,6 +3,7 @@ package xyz.ronella.tool.jprops.meta;
 import xyz.ronella.tool.jprops.JPropsException;
 import xyz.ronella.trivial.decorator.FileNomen;
 import xyz.ronella.trivial.decorator.StringBuilderAppender;
+import xyz.ronella.trivial.decorator.TextFile;
 import xyz.ronella.trivial.handy.OSType;
 import xyz.ronella.trivial.handy.RegExMatcher;
 
@@ -51,8 +52,8 @@ public class MetaGenerator {
     public MetaGenerator(final File propsFile, final OSType osType) {
         this.propsFile = propsFile;
         this.propsMetadata = new LinkedHashMap<>();
-        this.osType = osType;
-        this.valuePairPattern = "^(\\s*[a-zA-Z_].*?)=((.*(" + osType.getEOL().eol() + ")?)*?)$";
+        this.osType = Optional.ofNullable(osType).orElseGet(() -> OSType.of(new TextFile(propsFile).getEndOfLine()));
+        this.valuePairPattern = "^(\\s*[a-zA-Z_].*?)=((.*(" + this.osType.getEOL().eol() + ")?)*?)$";
         this.notLoaded = true;
     }
 
@@ -61,7 +62,7 @@ public class MetaGenerator {
      * @param propsFile The properties file.
      */
     public MetaGenerator(final File propsFile) {
-        this(propsFile, OSType.identify());
+        this(propsFile, OSType.of(new TextFile(propsFile).getEndOfLine()));
     }
 
     /**

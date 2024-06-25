@@ -2,6 +2,7 @@ package xyz.ronella.tool.jprops.meta;
 
 import org.junit.jupiter.api.Test;
 import xyz.ronella.tool.jprops.JPropsException;
+import xyz.ronella.trivial.handy.OSType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -177,10 +178,20 @@ public class MetaGeneratorTest {
     }
 
     @Test
-    public void startWithNonValuePari() {
+    public void startWithNonValuePair() {
         final var propsFile = Paths.get(".", "src", "test", "resources", "valid-2.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);
         assertDoesNotThrow(metaGen::getMetadata);
+    }
+
+    @Test
+    public void startWithValidLinux() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertDoesNotThrow(metaGen::getMetadata);
+        assertTrue(metaGen.getMetadata().values().stream().map(PropsMeta::osType)
+                .map(___osType -> ___osType == OSType.Linux)
+                .reduce(true, (___aggr, ___item) -> ___aggr && ___item));
     }
 
 }

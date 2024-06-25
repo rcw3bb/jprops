@@ -369,7 +369,7 @@ final public class ArgsMgr {
     private static void initTargetOSField(final ArgsMgr argManager, final CommandLine cmd) {
         Optional.ofNullable(cmd.getOptionValue("target-os")).flatMap(___os -> Arrays.stream(OSType.values())
                         .filter(___osType -> ___osType.name().equalsIgnoreCase(___os)).findFirst())
-                .ifPresentOrElse(argManager::setTargetOS, ()-> argManager.setTargetOS(OSType.identify()));
+                .ifPresent(argManager::setTargetOS);
     }
 
     private static void initFixField(final ArgsMgr argManager, final CommandLine cmd) {
