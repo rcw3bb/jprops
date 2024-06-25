@@ -2,6 +2,12 @@
 
 [TOC]
 
+## 1.3.0: 2024-06-26
+
+### New
+* Autodetect the EOL when the -os parameter is not provided.
+* Add encoding parameter to all the processor.
+
 ## 1.2.1: 2024-06-24
 
 ### Fix

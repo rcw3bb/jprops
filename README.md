@@ -1,4 +1,4 @@
-# JProps 1.2.1
+# JProps 1.3.0
 
 A simple properties file content manager.
 
@@ -130,13 +130,15 @@ In this command, `jprops` is the main command for the JProps tool, `sort` is the
 
 ## Line Ending
 
-All the available commands can use the `os` parameter to influence the line ending to use. For example to sort a properties files and use a `linux` line ending, use the following syntax:
+All the available commands that process a properties file can use the `-os` parameter to influence the line ending to use.
+
+For example to sort a properties files with `linux` line ending, use the following syntax:
 
 ```
 jprops sort -p <file> -apply -os linux
 ```
 
-If not provided the default it uses the system line ending.
+If not provided it will try to detect the line ending based on the what is use in properties file.
 
 The supported parameters for the `-os` is as follows:
 
@@ -146,6 +148,16 @@ The supported parameters for the `-os` is as follows:
 * Solaris
 * Unix
 * Windows
+
+## Encoding
+
+The default encoding is UTF-8. However if a different one needed use the `-encoding` parameter and provide the encoding supported by Java *(e.g. UTF-16LE)*. All the available commands that process a properties file support this parameter.
+
+For example to sort a properties file with `UTF-16LE` encoding, use the following syntax:
+
+```
+jprops sort -p <file> -apply -encoding UTF-16LE
+```
 
 ## License
 
