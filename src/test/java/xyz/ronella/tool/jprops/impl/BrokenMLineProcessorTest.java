@@ -3,9 +3,9 @@ package xyz.ronella.tool.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import xyz.ronella.tool.jprops.TextWriter;
 import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
+import xyz.ronella.trivial.decorator.TextFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +23,8 @@ public class BrokenMLineProcessorTest {
     public void testFix() throws IOException, MissingCommandException {
         final var props = new File("src\\test\\resources\\multiline-fields.properties");
         props.createNewFile();
-
-        TextWriter.write(props, """
+        final var textFile = new TextFile(props);
+        textFile.setText("""
                 mline1 = ml1 line1
                 ml1 line2
                 ml1 line3
@@ -55,8 +55,8 @@ public class BrokenMLineProcessorTest {
     public void testNothingToFix() throws IOException, MissingCommandException {
         final var props = new File("src\\test\\resources\\fixed-multiline-fields.properties");
         props.createNewFile();
-
-        TextWriter.write(props, """
+        final var textFile = new TextFile(props);
+        textFile.setText("""
                 mline1 = ml1 line1\\
                 ml1 line2\\
                 ml1 line3

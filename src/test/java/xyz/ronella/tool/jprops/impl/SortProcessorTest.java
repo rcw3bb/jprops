@@ -3,9 +3,9 @@ package xyz.ronella.tool.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import xyz.ronella.tool.jprops.TextWriter;
 import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
+import xyz.ronella.trivial.decorator.TextFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +33,9 @@ public class SortProcessorTest {
     public void testApply() throws IOException, MissingCommandException {
         final var props = new File("src\\test\\resources\\unsorted-fields.properties");
         props.createNewFile();
+        final var textFile = new TextFile(props);
 
-        TextWriter.write(props, """
+        textFile.setText("""
                 field5 = five
                 field2 = two
                 #comment1
@@ -62,8 +63,8 @@ public class SortProcessorTest {
     public void testNothingToApply() throws IOException, MissingCommandException {
         final var props = new File("src\\test\\resources\\sorted-fields.properties");
         props.createNewFile();
-
-        TextWriter.write(props, """
+        final var textFile = new TextFile(props);
+        textFile.setText("""
                 FIELD6 = six
                 FIELD7 = seven
                 field1 = one

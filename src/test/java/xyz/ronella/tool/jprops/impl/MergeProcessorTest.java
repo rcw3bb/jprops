@@ -3,8 +3,8 @@ package xyz.ronella.tool.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import xyz.ronella.tool.jprops.TextWriter;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
+import xyz.ronella.trivial.decorator.TextFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,8 +56,8 @@ public class MergeProcessorTest {
     public void testApply() throws IOException {
         final var dstProps = new File("src\\test\\resources\\dest-more-fields.properties");
         dstProps.createNewFile();
-
-        TextWriter.write(dstProps, """
+        final var textFile = new TextFile(dstProps);
+        textFile.setText("""
                 field5 = five
                 field2 = two
                 #comment1
@@ -88,8 +88,8 @@ public class MergeProcessorTest {
     public void testNothingApply() throws IOException {
         final var dstProps = new File("src\\test\\resources\\equal-fields.properties");
         dstProps.createNewFile();
-
-        TextWriter.write(dstProps, """
+        final var textFile = new TextFile(dstProps);
+        textFile.setText("""
                 field5 = five
                 field2 = two
                 #comment1
