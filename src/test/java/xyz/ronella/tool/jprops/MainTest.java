@@ -33,6 +33,12 @@ public class MainTest {
     }
 
     @Test
+    public void invalidProps() {
+        final var propFile = Paths.get(".", "src", "test", "resources", "invalid.properties").toFile();
+        assertDoesNotThrow(() -> Main.main(new String[]{"duplicate", "-p", propFile.getAbsolutePath()}));
+    }
+
+    @Test
     public void helpCommand() {
         assertDoesNotThrow(() -> Main.main(new String[]{"help"}));
     }

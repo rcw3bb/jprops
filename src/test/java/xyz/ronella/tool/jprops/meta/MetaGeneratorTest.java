@@ -185,6 +185,13 @@ public class MetaGeneratorTest {
     }
 
     @Test
+    public void startWithInvalidProps() {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "invalid.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile);
+        assertThrows(InvalidContentException.class, metaGen::getMetadata);
+    }
+
+    @Test
     public void startWithValidLinux() throws JPropsException {
         final var propsFile = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
         final var metaGen = new MetaGenerator(propsFile);

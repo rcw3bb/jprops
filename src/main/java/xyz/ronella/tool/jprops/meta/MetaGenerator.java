@@ -189,7 +189,11 @@ public class MetaGenerator {
      *
      * @since 1.1.0
      */
-    protected void updateMetadata(final String key, final String value) {
+    protected void updateMetadata(final String key, final String value) throws InvalidContentException {
+        if (key==null) {
+            throw new InvalidContentException("Invalid content found in the properties file.");
+        }
+
         final var oldMetadata = propsMetadata.get(key);
         final var oldValue = oldMetadata.currentValue();
         final var newValue = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
