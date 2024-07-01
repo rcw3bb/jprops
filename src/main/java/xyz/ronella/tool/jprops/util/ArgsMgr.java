@@ -329,7 +329,7 @@ final public class ArgsMgr {
 
             final var command = argManager.getCommand();
             if (Command.INVALID != command) {
-                cmd = parser.parse(options, newArgs, true);
+                cmd = parser.parse(options, newArgs, /*Stop at non-option*/ true);
                 if (Command.HELP == command) {
                     helpInfo(argManager, options);
                 } else {
