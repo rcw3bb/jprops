@@ -67,4 +67,11 @@ public class ArgsMgrTest {
         assertNull(argsMgr.getEncoding());
     }
 
+    @Test
+    public void extraParams() {
+        final var props = "non-existent.properties";
+        final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "extra", "-p", props).toArray(new String[] {}));
+        assertNull(argsMgr.getProps());
+    }
+
 }

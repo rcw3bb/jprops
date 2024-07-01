@@ -320,7 +320,7 @@ final public class ArgsMgr {
         final var argManager = new ArgsMgr();
         final var options = new Options();
 
-        final var parser = new DefaultParser();
+        final CommandLineParser parser = new DefaultParser();
         CommandLine cmd = null;
 
         try {
@@ -329,7 +329,7 @@ final public class ArgsMgr {
 
             final var command = argManager.getCommand();
             if (Command.INVALID != command) {
-                cmd = parser.parse(options, newArgs);
+                cmd = parser.parse(options, newArgs, true);
                 if (Command.HELP == command) {
                     helpInfo(argManager, options);
                 } else {
