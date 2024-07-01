@@ -320,7 +320,7 @@ final public class ArgsMgr {
         final var argManager = new ArgsMgr();
         final var options = new Options();
 
-        final CommandLineParser parser = new DefaultParser();
+        final var parser = new DefaultParser();
         CommandLine cmd = null;
 
         try {
