@@ -2,6 +2,11 @@
 
 [TOC]
 
+## 1.3.1: 2024-07-01
+
+### Fix
+* Any extra arguments passed to the command will cause the parsing to stop.
+
 ## 1.3.0: 2024-06-26
 
 ### New
