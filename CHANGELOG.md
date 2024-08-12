@@ -2,6 +2,11 @@
 
 [TOC]
 
+## 1.3.2: 2024-08-13
+
+### Fix
+* The executeLogics in MergeProcessor was bypassed when the key being processes was not in the source properties. 
+
 ## 1.3.1: 2024-07-01
 
 ### Fix
