@@ -82,6 +82,11 @@ public class MergeProcessorTest {
                 "-dp", dstProps.getAbsolutePath(), "-apply"}));
 
         assertDoesNotThrow(processor::process);
+
+        final var output = new TextFile(dstProps.getAbsolutePath());
+        final var outputContent = output.getText();
+        assertTrue(outputContent.contains("field9"));
+
         dstProps.delete();
         assertFalse(dstProps.exists());
     }

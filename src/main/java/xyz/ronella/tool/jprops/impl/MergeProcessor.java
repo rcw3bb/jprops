@@ -85,10 +85,8 @@ public class MergeProcessor extends AbstractProcessor {
             for (final var record : records) {
                 final var key = record.key();
                 final var srcPropMeta = Optional.ofNullable(srcMetaGen.getMetadata().get(key));
-                if (srcPropMeta.isPresent()) {
-                    final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
-                    hasChange = executeLogics(key, srcPropMeta.get(), dstPropsMeta, passThruLogic, updateLogic, addLogic);
-                }
+                final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
+                hasChange = executeLogics(key, srcPropMeta, dstPropsMeta, passThruLogic, updateLogic, addLogic);
             }
         }
         catch(MergeChangeException ___) {
@@ -98,24 +96,23 @@ public class MergeProcessor extends AbstractProcessor {
     }
 
     private boolean executeLogics(final String key,
-                                  final PropsMeta srcPropMeta,
+                                  final Optional<PropsMeta> srcPropMeta,
                                   final Optional<PropsMeta> dstPropsMeta,
                                   final MergeConsumer passThruLogic,
                                   final MergeUpdate updateLogic,
                                   final MergeConsumer addLogic) throws JPropsException {
         boolean hasChange = false;
         if (dstPropsMeta.isPresent()) {
-            final var srcValue = srcPropMeta.currentValue();
             final var dstValue = dstPropsMeta.get().currentValue();
-            if (!srcValue.equals(dstValue)) {
+            if (srcPropMeta.isPresent() && !srcPropMeta.get().currentValue().equals(dstValue)) {
                 hasChange = true;
-                updateLogic.process(key, srcPropMeta, dstPropsMeta.get());
+                updateLogic.process(key, srcPropMeta.get(), dstPropsMeta.get());
             } else {
                 passThruLogic.accept(key, dstPropsMeta.get());
             }
-        } else {
+        } else if (srcPropMeta.isPresent()) {
             hasChange = true;
-            addLogic.accept(key, srcPropMeta);
+            addLogic.accept(key, srcPropMeta.get());
         }
         return hasChange;
     }
@@ -124,7 +121,10 @@ public class MergeProcessor extends AbstractProcessor {
     public void persistLogic(PrintWriter writer, MetaGenerator dstMetaGen) throws JPropsException {
         try(final var gLOG = LOG.groupLog("applyMerge")) {
             gLOG.info("--- Apply Merge [BEGIN] ---");
-            processRecords(dstMetaGen, /*Pass through logic*/ (___key, ___propsMeta) -> outputWriter(writer, ___key, ___propsMeta),
+            processRecords(dstMetaGen,
+                    /*Pass through logic*/ (___key, ___propsMeta) -> {
+                        outputWriter(writer, ___key, ___propsMeta);
+                    },
                     /*Update logic*/ (___key, ___srcPropsMeta, ___dstPropsMeta) -> {
                         final var srcValue = ___srcPropsMeta.currentValue();
                         final var dstValue = ___dstPropsMeta.currentValue();
