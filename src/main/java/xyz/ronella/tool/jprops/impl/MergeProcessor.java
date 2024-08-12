@@ -84,9 +84,9 @@ public class MergeProcessor extends AbstractProcessor {
         try {
             for (final var record : records) {
                 final var key = record.key();
-                final var srcPropMeta = Optional.ofNullable(srcMetaGen.getMetadata().get(key));
-                final var dstPropsMeta = Optional.ofNullable(dstMetaGen.getMetadata().get(key));
-                hasChange = executeLogics(key, srcPropMeta, dstPropsMeta, passThruLogic, updateLogic, addLogic);
+                final var srcPropsMeta = srcMetaGen.getMetadata().get(key);
+                final var dstPropsMeta = dstMetaGen.getMetadata().get(key);
+                hasChange = executeLogics(key, srcPropsMeta, dstPropsMeta, passThruLogic, updateLogic, addLogic);
             }
         }
         catch(MergeChangeException ___) {
@@ -96,23 +96,26 @@ public class MergeProcessor extends AbstractProcessor {
     }
 
     private boolean executeLogics(final String key,
-                                  final Optional<PropsMeta> srcPropMeta,
-                                  final Optional<PropsMeta> dstPropsMeta,
+                                  final PropsMeta srcPropsMeta,
+                                  final PropsMeta dstPropsMeta,
                                   final MergeConsumer passThruLogic,
                                   final MergeUpdate updateLogic,
                                   final MergeConsumer addLogic) throws JPropsException {
         boolean hasChange = false;
-        if (dstPropsMeta.isPresent()) {
-            final var dstValue = dstPropsMeta.get().currentValue();
-            if (srcPropMeta.isPresent() && !srcPropMeta.get().currentValue().equals(dstValue)) {
+        final var optSrcPropsMeta = Optional.ofNullable(srcPropsMeta);
+        final var optDstPropsMeta = Optional.ofNullable(dstPropsMeta);
+
+        if (optDstPropsMeta.isPresent()) {
+            final var dstValue = optDstPropsMeta.get().currentValue();
+            if (optSrcPropsMeta.isPresent() && !optSrcPropsMeta.get().currentValue().equals(dstValue)) {
                 hasChange = true;
-                updateLogic.process(key, srcPropMeta.get(), dstPropsMeta.get());
+                updateLogic.process(key, optSrcPropsMeta.get(), optDstPropsMeta.get());
             } else {
-                passThruLogic.accept(key, dstPropsMeta.get());
+                passThruLogic.accept(key, optDstPropsMeta.get());
             }
-        } else if (srcPropMeta.isPresent()) {
+        } else if (optSrcPropsMeta.isPresent()) {
             hasChange = true;
-            addLogic.accept(key, srcPropMeta.get());
+            addLogic.accept(key, optSrcPropsMeta.get());
         }
         return hasChange;
     }
