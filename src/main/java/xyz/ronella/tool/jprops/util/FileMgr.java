@@ -30,8 +30,13 @@ final public class FileMgr {
     public static File createTmpFile(final File file) throws IOException {
         Require.objects(file);
 
-        final var fileName = new FileNomen(file).getFilename().orElse("NONAME");
+        var fileName = new FileNomen(file).getFilename().orElse("NONAME");
         final var suffix = ".properties";
+
+        final var minNumChars = 3;
+        if (fileName.length() < minNumChars) {
+            fileName = String.format("%" + minNumChars + "s", fileName).replace(' ', '_');
+        }
 
         return File.createTempFile(fileName, suffix);
     }
