@@ -406,9 +406,13 @@ final public class ArgsMgr {
     }
 
     private static void initTargetOSField(final ArgsMgr argManager, final CommandLine cmd) {
-        Optional.ofNullable(cmd.getOptionValue("target-os")).flatMap(___os -> Arrays.stream(OSType.values())
-                        .filter(___osType -> ___osType.name().equalsIgnoreCase(___os)).findFirst())
-                .ifPresent(argManager::setTargetOS);
+        Optional.ofNullable(cmd.getOptionValue("target-os"))
+                .ifPresent(___os -> {
+                    final var osType = OSType.of(___os);
+                    if (OSType.Unknown != osType) {
+                        argManager.setTargetOS(osType);
+                    }
+                });
     }
 
     private static void initEncodingField(final ArgsMgr argManager, final CommandLine cmd) {

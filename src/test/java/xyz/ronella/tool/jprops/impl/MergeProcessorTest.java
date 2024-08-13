@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
 import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.trivial.decorator.TextFile;
+import xyz.ronella.trivial.handy.OSType;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 
@@ -151,4 +151,68 @@ public class MergeProcessorTest {
         props.delete();
         assertFalse(props.exists());
     }
+
+    private String readTextFile(final File file) {
+        final var textContent = new StringBuilder();
+        try (final var reader = new FileReader(file)) {
+            int ch;
+            while ((ch = reader.read()) != -1) {
+                textContent.append((char) ch);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return textContent.toString();
+    }
+
+    @Test
+    public void testApplyWindowsToLinux() throws IOException, MissingCommandException {
+        final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
+        final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
+        final var dstPropsTextFile = new TextFile(dstProps, OSType.Linux.getEOL());
+        final var props = Paths.get(".", "src", "test", "resources", "merge-linux.properties").toFile();
+        props.createNewFile();
+        final var textFile = new TextFile(props, dstPropsTextFile.getEndOfLine());
+        final var expectedContent = "field1 = one\nfield2 = two\nfield3 = line1\\\nline2\\\nline3\nfield4 = 4\nfield5 = five\n";
+
+        textFile.setText(dstPropsTextFile.getText());
+
+        assertTrue(props.exists());
+
+        final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
+                "-dp", props.getAbsolutePath(), "-apply", "-os", "unix"}));
+
+        assertDoesNotThrow(processor::process);
+        final var propsContent = readTextFile(props);
+
+        assertEquals(expectedContent, propsContent);
+        props.delete();
+        assertFalse(props.exists());
+    }
+
+    @Test
+    public void testApplyWindowsToUnknown() throws IOException, MissingCommandException {
+        final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
+        final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
+        final var dstPropsTextFile = new TextFile(dstProps, OSType.Linux.getEOL());
+        final var props = Paths.get(".", "src", "test", "resources", "merge-linux.properties").toFile();
+        props.createNewFile();
+        final var textFile = new TextFile(props, dstPropsTextFile.getEndOfLine());
+        final var expectedContent = "field1 = one\nfield2 = two\nfield3 = line1\\\r\nline2\\\r\nline3\r\nfield4 = 4\r\nfield5 = five\n";
+
+        textFile.setText(dstPropsTextFile.getText());
+
+        assertTrue(props.exists());
+
+        final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
+                "-dp", props.getAbsolutePath(), "-apply", "-os", "unk"}));
+
+        assertDoesNotThrow(processor::process);
+        final var propsContent = readTextFile(props);
+
+        assertEquals(expectedContent, propsContent);
+        props.delete();
+        assertFalse(props.exists());
+    }
+
 }

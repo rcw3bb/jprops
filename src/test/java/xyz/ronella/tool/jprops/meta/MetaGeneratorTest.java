@@ -2,10 +2,12 @@ package xyz.ronella.tool.jprops.meta;
 
 import org.junit.jupiter.api.Test;
 import xyz.ronella.tool.jprops.JPropsException;
+import xyz.ronella.trivial.handy.EndOfLine;
 import xyz.ronella.trivial.handy.OSType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -198,6 +200,16 @@ public class MetaGeneratorTest {
         assertDoesNotThrow(metaGen::getMetadata);
         assertTrue(metaGen.getMetadata().values().stream().map(PropsMeta::osType)
                 .map(___osType -> ___osType == OSType.Linux)
+                .reduce(true, (___aggr, ___item) -> ___aggr && ___item));
+    }
+
+    @Test
+    public void startWithValidLinuxToWindows() throws JPropsException {
+        final var propsFile = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
+        final var metaGen = new MetaGenerator(propsFile, OSType.Windows, StandardCharsets.UTF_8);
+        assertDoesNotThrow(metaGen::getMetadata);
+        assertTrue(metaGen.getMetadata().values().stream().map(PropsMeta::osType)
+                .map(___osType -> ___osType == OSType.Windows)
                 .reduce(true, (___aggr, ___item) -> ___aggr && ___item));
     }
 

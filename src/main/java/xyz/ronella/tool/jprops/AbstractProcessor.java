@@ -63,6 +63,7 @@ public abstract class AbstractProcessor implements Processor {
                     try (final var writer = new PrintWriter(new FileWriter(tmpFile, argsMgr.getEncoding()))) {
                         persistLogic(writer, metaGen);
                     }
+
                     FileMgr.safeMove(argsMgr.getCommand(), tmpFile, props).ifPresent(___backupFile ->
                             LOG.info("Backup file created: %s", ___backupFile));
                 } else {
@@ -130,8 +131,8 @@ public abstract class AbstractProcessor implements Processor {
                 .filter(___lineType -> ___lineType == LineType.VALUE_PAIR)
                 .map(___isValuePair -> /* Value pair format */ "%s=%s%s")
                 .ifPresentOrElse(
-                        ___format -> writer.printf(___format, key, currentValue, eol),
-                        ()-> writer.printf(/* Generic format */ "%s%s", currentValue, eol)
+                        /* Present */ ___format -> writer.printf(___format, key, currentValue, eol),
+                        /* Else */ ()-> writer.printf(/* Generic format */ "%s%s", currentValue, eol)
                 );
     }
 }
