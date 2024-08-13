@@ -134,9 +134,9 @@ public class MergeProcessor extends AbstractProcessor {
                         outputWriter(writer, ___key, ___srcPropsMeta);
                         gLOG.info("\t[%s] was updated from [%s] to [%s]", ___key, dstValue, srcValue);
                     },
-                    /*Add logic*/ (___key, ___srcPropMeta) -> {
-                        final var srcValue = ___srcPropMeta.currentValue();
-                        outputWriter(writer, ___key, ___srcPropMeta);
+                    /*Add logic*/ (___key, ___srcPropsMeta) -> {
+                        final var srcValue = ___srcPropsMeta.currentValue();
+                        outputWriter(writer, ___key, ___srcPropsMeta);
                         gLOG.info("\t[%s] was added with the value [%s]", ___key, srcValue);
                     }
             );
