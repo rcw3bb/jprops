@@ -2,6 +2,12 @@
 
 [TOC]
 
+## 1.3.3: 2024-08-14
+
+### Fix
+* Cannot handle filename with less than 3 characters.
+* Fix unix is not a valid value for the -os parameter making it being ignored.
+
 ## 1.3.2: 2024-08-13
 
 ### Fix
