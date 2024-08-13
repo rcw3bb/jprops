@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 
 buildscript {
     dependencies {
-        classpath 'xyz.ronella.casual:trivial-chunk:2.19.0'
+        classpath 'xyz.ronella.casual:trivial-chunk:2.20.0'
     }
 }
 
