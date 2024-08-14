@@ -198,7 +198,7 @@ public class MergeProcessorTest {
         final var props = Paths.get(".", "src", "test", "resources", "merge-linux.properties").toFile();
         props.createNewFile();
         final var textFile = new TextFile(props, dstPropsTextFile.getEndOfLine());
-        final var expectedContent = "field1 = one\nfield2 = two\nfield3 = line1\\\r\nline2\\\r\nline3\r\nfield4 = 4\r\nfield5 = five\n";
+        final var expectedContent = "field1 = one\nfield2 = two\nfield3 = line1\\\nline2\\\nline3\nfield4 = 4\nfield5 = five\n";
 
         textFile.setText(dstPropsTextFile.getText());
 
@@ -206,6 +206,31 @@ public class MergeProcessorTest {
 
         final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
                 "-dp", props.getAbsolutePath(), "-apply", "-os", "unk"}));
+
+        assertDoesNotThrow(processor::process);
+        final var propsContent = readTextFile(props);
+
+        assertEquals(expectedContent, propsContent);
+        props.delete();
+        assertFalse(props.exists());
+    }
+
+    @Test
+    public void testApplyWindowsToLinuxProp() throws IOException, MissingCommandException {
+        final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
+        final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
+        final var dstPropsTextFile = new TextFile(dstProps, OSType.Linux.getEOL());
+        final var props = Paths.get(".", "src", "test", "resources", "merge-linux.properties").toFile();
+        props.createNewFile();
+        final var textFile = new TextFile(props, dstPropsTextFile.getEndOfLine());
+        final var expectedContent = "field1 = one\nfield2 = two\nfield3 = line1\\\nline2\\\nline3\nfield4 = 4\nfield5 = five\n";
+
+        textFile.setText(dstPropsTextFile.getText());
+
+        assertTrue(props.exists());
+
+        final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
+                "-dp", props.getAbsolutePath(), "-apply"}));
 
         assertDoesNotThrow(processor::process);
         final var propsContent = readTextFile(props);

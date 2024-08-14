@@ -60,12 +60,6 @@ public class MergeProcessor extends AbstractProcessor {
         return argsMgr.isApply();
     }
 
-    @Override
-    public void process() throws JPropsException {
-        srcMetaGen = new MetaGenerator(argsMgr.getSrcProps(), argsMgr.getTargetOS(), argsMgr.getEncoding());
-        super.process();
-    }
-
     private List<MergeProcessRecord> getAllRecords(final MetaGenerator dstMetaGen) throws JPropsException {
         final var srcKeys = srcMetaGen.getKeysByLineType(LineType.VALUE_PAIR);
         final var dstKeys = dstMetaGen.getKeysByLineType(LineType.VALUE_PAIR);
@@ -164,6 +158,7 @@ public class MergeProcessor extends AbstractProcessor {
 
     @Override
     public boolean shouldProcess(MetaGenerator dstMetaGen) throws JPropsException {
+        srcMetaGen = new MetaGenerator(argsMgr.getSrcProps(), dstMetaGen.getOSType(), argsMgr.getEncoding());
         return processRecords(dstMetaGen, /*Pass through logic*/ (___key, ___dstPropsMeta) -> {},
                 /*Update logic*/ (___key, ___srcPropsMeta, ___dstPropsMeta) -> {
                     throw new MergeChangeException();

@@ -69,6 +69,14 @@ public class MetaGenerator {
     }
 
     /**
+     * The getOsType method returns the operating system type to use.
+     * @return The OSType.
+     */
+    public OSType getOSType() {
+        return osType;
+    }
+
+    /**
      * The getMetadata method returns the per line metadata of the properties file.
      * @return The metadata of the properties file.
      * @throws JPropsException When an error occurs.
