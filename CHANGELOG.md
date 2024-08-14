@@ -2,6 +2,11 @@
 
 [TOC]
 
+## 1.4.0: 2024-08-14
+
+### Change
+* MergeProcessor now uses the destination file line ending when writing the output.
+
 ## 1.3.3: 2024-08-14
 
 ### Fix

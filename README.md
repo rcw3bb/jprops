@@ -1,4 +1,4 @@
-# JProps 1.3.3
+# JProps 1.4.0
 
 A simple properties file content manager.
 
@@ -101,6 +101,8 @@ jprops merge -sp <source-file> -dp <destination-file> -apply
 ```
 
 In this command, `jprops` is the main command for the JProps tool, `merge` is the sub-command used to manage merging properties files, `-sp` is the option to specify the source properties file, `<source-file>` is the path to the source properties file, `-dp` is the option to specify the destination properties file, `<destination-file>` is the path to the destination properties file, and `-apply` is the option to apply the merge.
+
+> The line ending of the destination-file takes presidents.
 
 ### Sorting Fields
 
