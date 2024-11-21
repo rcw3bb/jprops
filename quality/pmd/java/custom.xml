@@ -4,17 +4,18 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
 
     <description>
-        Best Pactices
+        Best Practices
     </description>
 
-    <exclude-pattern>.*/SimpleJson\.java</exclude-pattern>
-    <exclude-pattern>.*/SimpleHttpServer\.java</exclude-pattern>
-    <exclude-pattern>.*/SimpleHttpExchange\.java</exclude-pattern>
-    <exclude-pattern>.*/PersonServiceImpl\.java</exclude-pattern>
-    <exclude-pattern>.*/AbstractPersonResource\.java</exclude-pattern>
-    <exclude-pattern>.*/AppConfig\.java</exclude-pattern>
-
     <rule ref="category/java/design.xml/CyclomaticComplexity" />
+    <rule ref="category/java/design.xml/GodClass" />
+    <rule ref="category/java/design.xml/NcssCount">
+        <properties>
+            <property name="methodReportLevel" value="30" />
+            <property name="classReportLevel" value="1500" />
+            <property name="ncssOptions" value="" />
+        </properties>
+    </rule>
     <rule ref="category/java/errorprone.xml" />
     <rule ref="category/java/bestpractices.xml/AvoidPrintStackTrace" />
     <rule ref="category/java/bestpractices.xml/LooseCoupling" />
@@ -22,11 +23,6 @@
     <rule ref="category/java/bestpractices.xml/UnusedLocalVariable"/>
     <rule ref="category/java/bestpractices.xml/UnusedPrivateField"/>
     <rule ref="category/java/codestyle.xml/UnnecessaryImport" />
-    <rule ref="category/java/design.xml/ExcessiveMethodLength">
-        <properties>
-            <property name="minimum" value="30" />
-        </properties>
-    </rule>
     <rule ref="category/java/codestyle.xml/LongVariable">
         <properties>
             <property name="minimum" value="17" />
