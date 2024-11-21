@@ -85,16 +85,13 @@ public class MetaGenerator {
         if (notLoaded) {
             try (final var fileReader = new Scanner(propsFile, encoding)) {
                 validatePropsFile();
-                final var rawLine = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
                 var lineNumber = 0;
                 String lastKey = null;
                 while (fileReader.hasNextLine()) {
                     ++lineNumber;
                     final var currentLine = fileReader.nextLine();
-                    rawLine.append(currentLine);
-                    final var matcher = RegExMatcher.find(valuePairPattern, rawLine.toString(), Pattern.MULTILINE);
-                    lastKey = updateMetadata(lineNumber, matcher, rawLine, currentLine, lastKey).orElse(lastKey);
-                    rawLine.clear();
+                    final var matcher = RegExMatcher.find(valuePairPattern, currentLine, Pattern.MULTILINE);
+                    lastKey = updateMetadata(lineNumber, matcher, currentLine, lastKey).orElse(lastKey);
                 }
                 if (lastKey != null) {
                     // Final status update if lastKey was not completed.
@@ -120,15 +117,13 @@ public class MetaGenerator {
      * @param lineNumber The line number.
      * @param matcher The matcher.
      * @param rawLine The raw line.
-     * @param currentLine The current line.
      * @param lastKey The last key.
      * @return The key.
      * @throws JPropsException When an error occurs.
      */
     protected Optional<String> updateMetadata(final int lineNumber,
                                               final Matcher matcher,
-                                              final StringBuilderAppender rawLine,
-                                              final String currentLine,
+                                              final String rawLine,
                                               final String lastKey) throws JPropsException {
         Optional<String> output = Optional.empty();
         if (matcher.matches()) {
@@ -139,12 +134,12 @@ public class MetaGenerator {
             }
             updateMetadata(lineNumber, key, value);
             output = Optional.of(key);
-        } else if (!currentLine.matches(MLINE_CONTINUE)) {
-            updateMetadata(lastKey, currentLine);
+        } else if (!rawLine.matches(MLINE_CONTINUE)) {
+            updateMetadata(lastKey, rawLine);
         }
         else {
             updateStatus(lastKey);
-            updateMetadata(lineNumber, rawLine.toString());
+            updateMetadata(lineNumber, rawLine);
         }
         return output;
     }
