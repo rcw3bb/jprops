@@ -82,18 +82,6 @@ public record PropsMeta(int count, String currentValue, String prevValue, OSType
     }
 
     /**
-     * Set the osType property.
-     * @param osType The osType property.
-     * @return The PropsMeta instance.
-     *
-     * @since 1.4.0
-     */
-    public PropsMeta setOSType(OSType osType) {
-        return new PropsMeta(this.count, this.currentValue, this.prevValue, osType,
-                this.lineNumber, this.lineType, this.isComplete, this.isMultiline, isBrokenMLine);
-    }
-
-    /**
      * Set the isBrokenMLine property.
      * @param isBrokenMLine The isBrokenMLine property.
      * @return The PropsMeta instance.

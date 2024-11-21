@@ -40,7 +40,7 @@ public class SortProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean mustPersist(final MetaGenerator metaGen) throws JPropsException {
+    public boolean mustPersist(final MetaGenerator metaGen) {
         return argsMgr.isApply();
     }
 

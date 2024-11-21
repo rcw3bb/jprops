@@ -46,9 +46,9 @@ public class MergeProcessor extends AbstractProcessor {
         LOG.info("""
                         
                         ----------------------------------------
-                        Working on merging 
-                        \t%s 
-                        to 
+                        Working on merging
+                        \t%s
+                        to
                         \t%s
                         ----------------------------------------""", srcProps.getAbsolutePath(), dstProps.getAbsolutePath());
 
@@ -56,7 +56,7 @@ public class MergeProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean mustPersist(MetaGenerator dstMetaGen) throws JPropsException {
+    public boolean mustPersist(MetaGenerator dstMetaGen) {
         return argsMgr.isApply();
     }
 

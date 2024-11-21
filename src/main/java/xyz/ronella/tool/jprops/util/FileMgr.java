@@ -84,7 +84,7 @@ final public class FileMgr {
      * @return The backup file.
      * @throws IOException If an I/O error occurs.
      */
-    protected static Optional<File> moveToBackup(final Command command, final File file) throws IOException {
+     static Optional<File> moveToBackup(final Command command, final File file) throws IOException {
         Require.objects(file);
 
         if (file.exists()) {

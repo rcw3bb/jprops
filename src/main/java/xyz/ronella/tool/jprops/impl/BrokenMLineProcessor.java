@@ -45,7 +45,7 @@ public class BrokenMLineProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean mustPersist(MetaGenerator metaGen) throws JPropsException {
+    public boolean mustPersist(MetaGenerator metaGen) {
         return argsMgr.isFix();
     }
 
@@ -61,7 +61,7 @@ public class BrokenMLineProcessor extends AbstractProcessor {
             gLOG.info("--- Broken Multiline Fields [BEGIN] ---");
             for (final var meta : metadata) {
                 gLOG.info("""
-                                                    
+                                
                                 --[KEY]----------------
                                 [%s]
                                 --[VALUE]--------------
