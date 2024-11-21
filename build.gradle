@@ -120,6 +120,8 @@ jar {
                 "Implementation-Version": project.version
         )
     }
+
+    dependsOn test
 }
 
 pmd {
