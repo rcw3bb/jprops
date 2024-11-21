@@ -199,17 +199,17 @@ public class MetaGeneratorTest {
         final var metaGen = new MetaGenerator(propsFile);
         assertDoesNotThrow(metaGen::getMetadata);
         assertTrue(metaGen.getMetadata().values().stream().map(PropsMeta::osType)
-                .map(___osType -> ___osType == OSType.Linux)
+                .map(___osType -> ___osType == OSType.LINUX)
                 .reduce(true, (___aggr, ___item) -> ___aggr && ___item));
     }
 
     @Test
     public void startWithValidLinuxToWindows() throws JPropsException {
         final var propsFile = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
-        final var metaGen = new MetaGenerator(propsFile, OSType.Windows, StandardCharsets.UTF_8);
+        final var metaGen = new MetaGenerator(propsFile, OSType.WINDOWS, StandardCharsets.UTF_8);
         assertDoesNotThrow(metaGen::getMetadata);
         assertTrue(metaGen.getMetadata().values().stream().map(PropsMeta::osType)
-                .map(___osType -> ___osType == OSType.Windows)
+                .map(___osType -> ___osType == OSType.WINDOWS)
                 .reduce(true, (___aggr, ___item) -> ___aggr && ___item));
     }
 

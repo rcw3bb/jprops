@@ -20,6 +20,7 @@ import java.util.Optional;
  * @author Ron Webb
  * @since 1.0.0
  */
+@SuppressWarnings("PMD.GodClass")
 final public class ArgsMgr {
 
     private final static LoggerPlus LOGGER_PLUS = new LoggerPlus(LoggerFactory.getLogger(ArgsMgr.class));
@@ -409,7 +410,7 @@ final public class ArgsMgr {
         Optional.ofNullable(cmd.getOptionValue("target-os"))
                 .ifPresent(___os -> {
                     final var osType = OSType.of(___os);
-                    if (OSType.Unknown != osType) {
+                    if (OSType.UNKNOWN != osType) {
                         argManager.setTargetOS(osType);
                     }
                 });

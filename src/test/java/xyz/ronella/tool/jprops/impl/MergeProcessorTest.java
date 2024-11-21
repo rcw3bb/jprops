@@ -169,7 +169,7 @@ public class MergeProcessorTest {
     public void testApplyWindowsToLinux() throws IOException, MissingCommandException {
         final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
-        final var dstPropsTextFile = new TextFile(dstProps, OSType.Linux.getEOL());
+        final var dstPropsTextFile = new TextFile(dstProps, OSType.LINUX.getEOL());
         final var props = Paths.get(".", "src", "test", "resources", "merge-linux.properties").toFile();
         props.createNewFile();
         final var textFile = new TextFile(props, dstPropsTextFile.getEndOfLine());
@@ -194,7 +194,7 @@ public class MergeProcessorTest {
     public void testApplyWindowsToUnknown() throws IOException, MissingCommandException {
         final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
-        final var dstPropsTextFile = new TextFile(dstProps, OSType.Linux.getEOL());
+        final var dstPropsTextFile = new TextFile(dstProps, OSType.LINUX.getEOL());
         final var props = Paths.get(".", "src", "test", "resources", "merge-linux.properties").toFile();
         props.createNewFile();
         final var textFile = new TextFile(props, dstPropsTextFile.getEndOfLine());
@@ -219,7 +219,7 @@ public class MergeProcessorTest {
     public void testApplyWindowsToLinuxProp() throws IOException, MissingCommandException {
         final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
-        final var dstPropsTextFile = new TextFile(dstProps, OSType.Linux.getEOL());
+        final var dstPropsTextFile = new TextFile(dstProps, OSType.LINUX.getEOL());
         final var props = Paths.get(".", "src", "test", "resources", "merge-linux.properties").toFile();
         props.createNewFile();
         final var textFile = new TextFile(props, dstPropsTextFile.getEndOfLine());

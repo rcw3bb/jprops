@@ -43,7 +43,7 @@ public class ArgsMgrTest {
     public void linuxOS() throws MissingCommandException {
         final var props = "non-existent.properties";
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-os", "linux").toArray(new String[] {}));
-        assertEquals(OSType.Linux, argsMgr.getTargetOS());
+        assertEquals(OSType.LINUX, argsMgr.getTargetOS());
     }
 
     @Test
