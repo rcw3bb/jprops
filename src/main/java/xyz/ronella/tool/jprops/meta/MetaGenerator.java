@@ -4,6 +4,7 @@ import xyz.ronella.tool.jprops.JPropsException;
 import xyz.ronella.trivial.decorator.FileNomen;
 import xyz.ronella.trivial.decorator.StringBuilderAppender;
 import xyz.ronella.trivial.decorator.TextFile;
+import xyz.ronella.trivial.functional.impl.StringBuilderDelim;
 import xyz.ronella.trivial.handy.OSType;
 import xyz.ronella.trivial.handy.RegExMatcher;
 
@@ -170,9 +171,8 @@ public class MetaGenerator {
      * @param lineNumber The line number.
      * @param key The key.
      * @param value The value.
-     * @throws JPropsException When an error occurs.
      */
-    protected void updateMetadata(final int lineNumber, final String key, final String value) throws JPropsException {
+    protected void updateMetadata(final int lineNumber, final String key, final String value) {
         final var oldMetadata = Optional.ofNullable(propsMetadata.get(key))
                 .orElse(new PropsMeta(0, /*Current value*/ value, /*Previous value*/ null, osType, lineNumber,
                         LineType.VALUE_PAIR,
@@ -199,7 +199,7 @@ public class MetaGenerator {
 
         final var oldMetadata = propsMetadata.get(key);
         final var oldValue = oldMetadata.currentValue();
-        final var newValue = new StringBuilderAppender(___sb -> ___sb.append(!___sb.isEmpty() ? osType.getEOL().eol() : ""));
+        final var newValue = new StringBuilderAppender(new StringBuilderDelim<>(osType.getEOL().eol()));
 
         newValue.append(oldValue);
         newValue.append(value);
