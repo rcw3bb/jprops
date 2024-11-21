@@ -1,0 +1,37 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+ch.qos.logback:logback-classic:1.5.12=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+ch.qos.logback:logback-core:1.5.12=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+com.beust:jcommander:1.48=pmd
+com.google.code.gson:gson:2.8.9=pmd
+commons-cli:commons-cli:1.9.0=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+net.bytebuddy:byte-buddy-agent:1.15.4=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+net.bytebuddy:byte-buddy:1.15.4=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+net.sourceforge.pmd:pmd-core:6.55.0=pmd
+net.sourceforge.pmd:pmd-java:6.55.0=pmd
+net.sourceforge.saxon:saxon:9.1.0.8=pmd
+org.antlr:antlr4-runtime:4.7.2=pmd
+org.apache.commons:commons-lang3:3.8.1=pmd
+org.apiguardian:apiguardian-api:1.1.2=testCompileClasspath
+org.jacoco:org.jacoco.agent:0.8.12=jacocoAgent,jacocoAnt
+org.jacoco:org.jacoco.ant:0.8.12=jacocoAnt
+org.jacoco:org.jacoco.core:0.8.12=jacocoAnt
+org.jacoco:org.jacoco.report:0.8.12=jacocoAnt
+org.junit.jupiter:junit-jupiter-api:5.11.3=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.junit.jupiter:junit-jupiter-engine:5.11.3=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.junit.platform:junit-platform-commons:1.11.3=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.junit.platform:junit-platform-engine:1.11.3=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.junit:junit-bom:5.11.3=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.mockito:mockito-core:5.14.2=mockitoAgent,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.mockito:mockito-inline:5.2.0=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.objenesis:objenesis:3.3=testPmdAuxClasspath,testRuntimeClasspath
+org.opentest4j:opentest4j:1.3.0=testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+org.ow2.asm:asm-commons:9.7=jacocoAnt
+org.ow2.asm:asm-tree:9.7=jacocoAnt
+org.ow2.asm:asm:9.4=pmd
+org.ow2.asm:asm:9.7=jacocoAnt
+org.slf4j:slf4j-api:2.0.16=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+xyz.ronella.casual:trivial-chunk:3.0.0=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+xyz.ronella.logging:logger-plus:1.2.0=compileClasspath,mainPmdAuxClasspath,runtimeClasspath,testCompileClasspath,testPmdAuxClasspath,testRuntimeClasspath
+empty=annotationProcessor,dataFiles,shadow,testAnnotationProcessor

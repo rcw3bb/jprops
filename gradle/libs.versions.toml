@@ -1,0 +1,26 @@
+[versions]
+trivial-chunk-version = { require = "latest.release"}
+logger-plus-version = { require = "latest.release"}
+slf4j-api-version = { strictly = "[2.0,2.1[", require = "latest.release"}
+logback-version = { strictly = "[1.5,1.6[", require = "latest.release"}
+commons-cli-version = { strictly = "[1.9,2.0[", require = "latest.release"}
+module-plugin-version = { require = "latest.release"}
+jlink-version = { require = "latest.release"}
+shadow-version = { require = "latest.release"}
+snyk-version = { require = "latest.release" }
+
+[libraries]
+slf4j-api = {module = "org.slf4j:slf4j-api", version.ref = "slf4j-api-version" }
+logback-classic = {module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
+logger-plus = { module = "xyz.ronella.logging:logger-plus", version.ref = "logger-plus-version" }
+trivial-chunk = { module = "xyz.ronella.casual:trivial-chunk", version.ref = "trivial-chunk-version" }
+commons-cli = { module = "commons-cli:commons-cli", version.ref = "commons-cli-version" }
+
+[bundles]
+logger = ["slf4j-api", "logback-classic", "logger-plus"]
+
+[plugins]
+moduleplugin = { id = "org.javamodularity.moduleplugin", version.ref = "module-plugin-version" }
+jlink = { id = "org.beryx.jlink", version.ref = "jlink-version" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow-version" }
+snyk = { id = "io.snyk.gradle.plugin.snykplugin", version.ref = "snyk-version" }

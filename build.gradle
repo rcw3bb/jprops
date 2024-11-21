@@ -5,26 +5,36 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import java.text.SimpleDateFormat
 
 buildscript {
+    configurations.classpath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+
     dependencies {
-        classpath 'xyz.ronella.casual:trivial-chunk:2.20.0'
+        classpath libs.trivial.chunk
     }
 }
 
 plugins {
     id 'application'
-    id "org.javamodularity.moduleplugin" version "1.8.15"
-    id 'org.beryx.jlink' version '3.0.1'
     id 'jacoco'
     id 'pmd'
-    id "com.github.johnrengelman.shadow" version "8.1.1"
-    id "io.snyk.gradle.plugin.snykplugin" version "0.6.1"
+
+    alias(libs.plugins.moduleplugin)
+    alias(libs.plugins.jlink)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.snyk)
 }
 
 group GROUP
 version VERSION
 
+configurations {
+    mockitoAgent
+}
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 application {
@@ -51,18 +61,19 @@ repositories {
     mavenCentral()
 }
 
+dependencyLocking {
+    lockAllConfigurations()
+}
+
 dependencies {
-    implementation 'org.slf4j:slf4j-api:2.0.13'
-    implementation 'ch.qos.logback:logback-classic:1.5.6'
+    implementation libs.bundles.logger
+    implementation libs.commons.cli
+    implementation libs.trivial.chunk
 
-    implementation 'commons-cli:commons-cli:1.8.0'
-    implementation 'xyz.ronella.casual:trivial-chunk:2.20.0'
-    implementation 'xyz.ronella.logging:logger-plus:1.2.0'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
-
-    testImplementation 'org.mockito:mockito-core:5.11.0'
+    testImplementation testLibs.bundles.unit.test
+    mockitoAgent(testLibs.mockito.core) {
+        transitive = false
+    }
 }
 
 ext {
@@ -75,6 +86,7 @@ ext {
 }
 
 test {
+    jvmArgs("-javaagent:${configurations.mockitoAgent.asPath}")
     dependsOn(pmdMain)
     finalizedBy(jacocoTestReport)
     finalizedBy('snyk-test')
