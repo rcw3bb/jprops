@@ -3,7 +3,6 @@ package xyz.ronella.tool.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
 import xyz.ronella.trivial.decorator.TextFile;
 
@@ -15,7 +14,7 @@ import java.nio.file.Paths;
 public class DuplicateProcessorTest {
 
     @Test
-    public void checkDuplicate() throws MissingCommandException {
+    public void checkDuplicate()  {
         final var propFile = Paths.get(".", "src", "test", "resources", "duplicate.properties").toFile();
         final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p", propFile.getAbsolutePath()}));
 
@@ -23,14 +22,14 @@ public class DuplicateProcessorTest {
     }
 
     @Test
-    public void checkNoDuplicate() throws MissingCommandException {
+    public void checkNoDuplicate() {
         final var propFile = Paths.get(".", "src", "test", "resources", "valid.properties").toFile();
         final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p", propFile.getAbsolutePath()}));
         assertDoesNotThrow(processor::process);
     }
 
     @Test
-    public void testDedupe() throws IOException, MissingCommandException {
+    public void testDedupe() throws IOException {
         final var props = new File("src\\test\\resources\\duplicate-fields.properties");
         props.createNewFile();
         final var textFile = new TextFile(props);
@@ -65,7 +64,7 @@ public class DuplicateProcessorTest {
     }
 
     @Test
-    public void testDedupeUTF16() throws IOException, MissingCommandException {
+    public void testDedupeUTF16() throws IOException {
         final var utf16Props = new File("src\\test\\resources\\duplicate-linux-utf16.properties");
         final var utf16TextFile = new TextFile(utf16Props, StandardCharsets.UTF_16LE);
         final var props = new File("src\\test\\resources\\duplicate-fields-dummy.properties");
@@ -84,7 +83,7 @@ public class DuplicateProcessorTest {
     }
 
     @Test
-    public void testNothingToDedupe() throws IOException, MissingCommandException {
+    public void testNothingToDedupe() throws IOException {
         final var props = new File("src\\test\\resources\\duplicate-fields.properties");
         props.createNewFile();
         final var textFile = new TextFile(props);
@@ -113,7 +112,7 @@ public class DuplicateProcessorTest {
     }
 
     @Test
-    public void testLinuxUTF16() throws IOException, MissingCommandException {
+    public void testLinuxUTF16() {
         final var propFile = Paths.get(".", "src", "test", "resources", "duplicate-linux-utf16.properties").toFile();
         final var processor = new DuplicateProcessor(ArgsMgr.build(new String[] {"duplicate", "-p", propFile.getAbsolutePath(), "-encoding", StandardCharsets.UTF_16LE.name()}));
 

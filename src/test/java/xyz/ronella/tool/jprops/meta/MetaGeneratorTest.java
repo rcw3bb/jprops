@@ -2,7 +2,6 @@ package xyz.ronella.tool.jprops.meta;
 
 import org.junit.jupiter.api.Test;
 import xyz.ronella.tool.jprops.JPropsException;
-import xyz.ronella.trivial.handy.EndOfLine;
 import xyz.ronella.trivial.handy.OSType;
 
 import static org.junit.jupiter.api.Assertions.*;

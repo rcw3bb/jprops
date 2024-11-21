@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
-import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.trivial.decorator.TextFile;
 import xyz.ronella.trivial.handy.OSType;
 
@@ -63,16 +62,16 @@ public class MergeProcessorTest {
                 field5 = five
                 field2 = two
                 #comment1
-                                    
+                
                 field1 = one
                 field4 = four
                 field3 = line1\\
                 line2\\
                 line3
-                                    
+                
                 FIELD6 = six
                 FIELD7 = seven
-                                    
+                
                 field9 = nine
                 """);
 
@@ -122,7 +121,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void testLinuxUTF16() throws IOException, MissingCommandException {
+    public void testLinuxUTF16() {
         final var srcProps = Paths.get(".", "src", "test", "resources", "source-linux-utf16.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "destination-linux-utf16.properties").toFile();
         final var processor = new MergeProcessor(ArgsMgr.build(new String[] {"merge", "-sp", srcProps.getAbsolutePath(),
@@ -132,7 +131,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void testApplyUTF16() throws IOException, MissingCommandException {
+    public void testApplyUTF16() throws IOException {
         final var srcProps = Paths.get(".", "src", "test", "resources", "source-linux-utf16.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "destination-linux-utf16.properties").toFile();
         final var dstPropsTextFile = new TextFile(dstProps, StandardCharsets.UTF_16LE);
@@ -166,7 +165,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void testApplyWindowsToLinux() throws IOException, MissingCommandException {
+    public void testApplyWindowsToLinux() throws IOException {
         final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
         final var dstPropsTextFile = new TextFile(dstProps, OSType.LINUX.getEOL());
@@ -191,7 +190,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void testApplyWindowsToUnknown() throws IOException, MissingCommandException {
+    public void testApplyWindowsToUnknown() throws IOException {
         final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
         final var dstPropsTextFile = new TextFile(dstProps, OSType.LINUX.getEOL());
@@ -216,7 +215,7 @@ public class MergeProcessorTest {
     }
 
     @Test
-    public void testApplyWindowsToLinuxProp() throws IOException, MissingCommandException {
+    public void testApplyWindowsToLinuxProp() throws IOException {
         final var srcProps = Paths.get(".", "src", "test", "resources", "valid-windows.properties").toFile();
         final var dstProps = Paths.get(".", "src", "test", "resources", "valid-linux.properties").toFile();
         final var dstPropsTextFile = new TextFile(dstProps, OSType.LINUX.getEOL());

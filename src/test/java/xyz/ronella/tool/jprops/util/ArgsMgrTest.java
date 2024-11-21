@@ -14,40 +14,40 @@ import java.util.List;
 public class ArgsMgrTest {
 
     @Test
-    public void helpCommand() throws MissingCommandException {
+    public void helpCommand() {
         final var argsMgr = ArgsMgr.build(List.of(Command.HELP.name()).toArray(new String[] {}));
         assertEquals(Command.HELP, argsMgr.getCommand());
     }
 
     @Test
-    public void dupCommand() throws MissingCommandException {
+    public void dupCommand() {
         final var props = "non-existent.properties";
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props).toArray(new String[] {}));
         assertEquals(new File(props), argsMgr.getProps());
     }
 
     @Test
-    public void dedupe() throws MissingCommandException {
+    public void dedupe() {
         final var props = "non-existent.properties";
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-dedupe").toArray(new String[] {}));
         assertTrue(argsMgr.isDedupe());
     }
 
     @Test
-    public void dupHelp() throws MissingCommandException {
+    public void dupHelp() {
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-h").toArray(new String[] {}));
         assertEquals(Command.DUPLICATE, argsMgr.getCommand());
     }
 
     @Test
-    public void linuxOS() throws MissingCommandException {
+    public void linuxOS() {
         final var props = "non-existent.properties";
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-os", "linux").toArray(new String[] {}));
         assertEquals(OSType.LINUX, argsMgr.getTargetOS());
     }
 
     @Test
-    public void invalidOS() throws MissingCommandException {
+    public void invalidOS() {
         final var props = "non-existent.properties";
         final var argsMgr = ArgsMgr.build(List.of(Command.DUPLICATE.name(), "-p", props, "-os", "invalid").toArray(new String[] {}));
         assertNull(argsMgr.getTargetOS());

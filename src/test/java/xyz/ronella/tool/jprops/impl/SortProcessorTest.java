@@ -3,7 +3,6 @@ package xyz.ronella.tool.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
 import xyz.ronella.trivial.decorator.TextFile;
 
@@ -15,7 +14,7 @@ import java.nio.file.Paths;
 public class SortProcessorTest {
 
     @Test
-    public void unsortedProperties() throws MissingCommandException {
+    public void unsortedProperties() {
         final var propFile = Paths.get(".", "src", "test", "resources", "unsorted.properties").toFile();
         final var processor = new SortProcessor(ArgsMgr.build(new String[] {"sort", "-p", propFile.getAbsolutePath()}));
 
@@ -23,7 +22,7 @@ public class SortProcessorTest {
     }
 
     @Test
-    public void sortedProperties() throws MissingCommandException {
+    public void sortedProperties() {
         final var propFile = Paths.get(".", "src", "test", "resources", "sorted.properties").toFile();
         final var processor = new SortProcessor(ArgsMgr.build(new String[] {"sort", "-p", propFile.getAbsolutePath()}));
 
@@ -31,7 +30,7 @@ public class SortProcessorTest {
     }
 
     @Test
-    public void testApply() throws IOException, MissingCommandException {
+    public void testApply() throws IOException {
         final var props = new File("src\\test\\resources\\unsorted-fields.properties");
         props.createNewFile();
         final var textFile = new TextFile(props);
@@ -61,7 +60,7 @@ public class SortProcessorTest {
     }
 
     @Test
-    public void testApplyShortFilename() throws IOException, MissingCommandException {
+    public void testApplyShortFilename() throws IOException {
         final var props = new File("src\\test\\resources\\a.properties");
         props.createNewFile();
         final var textFile = new TextFile(props);
@@ -85,14 +84,13 @@ public class SortProcessorTest {
         final var processor = new SortProcessor(ArgsMgr.build(new String[] {"sort", "-p",
                 props.getAbsolutePath(), "-apply"}));
 
-        //assertThrows(IllegalArgumentException.class, processor::process);
         assertDoesNotThrow(processor::process);
         props.delete();
         assertFalse(props.exists());
     }
 
     @Test
-    public void testNothingToApply() throws IOException, MissingCommandException {
+    public void testNothingToApply() throws IOException {
         final var props = new File("src\\test\\resources\\sorted-fields.properties");
         props.createNewFile();
         final var textFile = new TextFile(props);
@@ -118,7 +116,7 @@ public class SortProcessorTest {
     }
 
     @Test
-    public void testLinuxUTF16() throws IOException, MissingCommandException {
+    public void testLinuxUTF16() {
         final var propFile = Paths.get(".", "src", "test", "resources", "unsorted-linux-utf16.properties").toFile();
         final var processor = new SortProcessor(ArgsMgr.build(new String[] {"sort", "-p", propFile.getAbsolutePath(), "-encoding", StandardCharsets.UTF_16LE.name()}));
 
@@ -126,7 +124,7 @@ public class SortProcessorTest {
     }
 
     @Test
-    public void testApplyUTF16() throws IOException, MissingCommandException {
+    public void testApplyUTF16() throws IOException {
         final var utf16Props = new File("src\\test\\resources\\unsorted-linux-utf16.properties");
         final var utf16TextFile = new TextFile(utf16Props, StandardCharsets.UTF_16LE);
         final var props = new File("src\\test\\resources\\unsorted-fields-dummy.properties");

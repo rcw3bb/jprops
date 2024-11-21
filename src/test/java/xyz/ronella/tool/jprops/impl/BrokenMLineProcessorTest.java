@@ -3,7 +3,6 @@ package xyz.ronella.tool.jprops.impl;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import xyz.ronella.tool.jprops.util.MissingCommandException;
 import xyz.ronella.tool.jprops.util.ArgsMgr;
 import xyz.ronella.trivial.decorator.TextFile;
 
@@ -14,14 +13,14 @@ import java.nio.file.Paths;
 
 public class BrokenMLineProcessorTest {
     @Test
-    public void bmLineProcessor() throws MissingCommandException {
+    public void bmLineProcessor() {
         final var propFile = Paths.get(".", "src", "test", "resources", "multiline.properties").toFile();
         final var processor = new BrokenMLineProcessor(ArgsMgr.build(new String[] {"bmline", "-p", propFile.getAbsolutePath()}));
         assertDoesNotThrow(processor::process);
     }
 
     @Test
-    public void testFix() throws IOException, MissingCommandException {
+    public void testFix() throws IOException {
         final var props = new File("src\\test\\resources\\multiline-fields.properties");
         props.createNewFile();
         final var textFile = new TextFile(props);
@@ -53,7 +52,7 @@ public class BrokenMLineProcessorTest {
     }
 
     @Test
-    public void testNothingToFix() throws IOException, MissingCommandException {
+    public void testNothingToFix() throws IOException {
         final var props = new File("src\\test\\resources\\fixed-multiline-fields.properties");
         props.createNewFile();
         final var textFile = new TextFile(props);
@@ -85,7 +84,7 @@ public class BrokenMLineProcessorTest {
     }
 
     @Test
-    public void testLinuxUTF16() throws IOException, MissingCommandException {
+    public void testLinuxUTF16() {
         final var propFile = Paths.get(".", "src", "test", "resources", "multiline-linux-utf16.properties").toFile();
         final var processor = new BrokenMLineProcessor(ArgsMgr.build(new String[] {"bmline", "-p", propFile.getAbsolutePath(), "-encoding", StandardCharsets.UTF_16LE.name()}));
 
@@ -93,7 +92,7 @@ public class BrokenMLineProcessorTest {
     }
 
     @Test
-    public void testFixUTF16() throws IOException, MissingCommandException {
+    public void testFixUTF16() throws IOException {
         final var utf16Props = new File("src\\test\\resources\\multiline-linux-utf16.properties");
         final var utf16TextFile = new TextFile(utf16Props, StandardCharsets.UTF_16LE);
         final var props = new File("src\\test\\resources\\multiline-fields-dummy.properties");
