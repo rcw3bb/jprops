@@ -1,6 +1,14 @@
 # Changelog
 
-[TOC]
+## 1.5.0: 2024-11-22
+
+### New
+
+* Log the command being executed.
+
+### Change
+
+* The conf directory is not created automatically anymore. 
 
 ## 1.4.0: 2024-08-14
 

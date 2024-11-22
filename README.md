@@ -1,4 +1,4 @@
-# JProps 1.4.0
+# JProps 1.5.0
 
 A simple properties file content manager.
 
