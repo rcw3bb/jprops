@@ -59,25 +59,6 @@ final public class FileMgr {
     }
 
     /**
-     * The getConfDir method returns the configuration directory.
-     * @return The configuration directory.
-     *
-     * @since 1.2.0
-     */
-    public static Optional<File> getConfDir() {
-        final var appData = Optional.of(System.getProperty("user.dir"));
-        return appData.map(___appData -> {
-            final var confDir = new File(String.format("%s/conf", ___appData));
-
-            if (!confDir.exists()) {
-                confDir.mkdirs();
-            }
-
-            return confDir;
-        });
-    }
-
-    /**
      * The moveToBackup method moves the file to the backup directory.
      * @param command The command.
      * @param file The file.
